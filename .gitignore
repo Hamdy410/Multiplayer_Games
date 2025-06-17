@@ -1,50 +1,139 @@
-# CMake build directory
-/build/
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
+# --- Build Artifacts ---
+# CMake build directories
+build/
+out/
+bin/
+lib/
+*.sln
+*.vcxproj*
+*.xcodeproj/
+*.cbp
 Makefile
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+*.ninja
+.ninja_deps
+.ninja_log
 
 # Compiled binaries
 *.exe
-*.out
 *.app
-*.a
 *.so
-*.dll
 *.dylib
-
-# Backup and temporary files
-*~
-*.swp
-*.bak
-*.tmp
-*.log
-
-# Object files
+*.dll
+*.a
+*.lib
 *.o
 *.obj
+*.out
 
-# Visual Studio Code
+# --- Dependency Directories ---
+# vcpkg (Windows)
+vcpkg_installed/
+vcpkg/scripts/buildsystems/
+
+# Conan
+.conan/
+conanbuildinfo.cmake
+conaninfo.txt
+
+# --- IDE & Editor Configurations ---
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+ipch/
+
+# VS Code
 .vscode/
-*.code-workspace
-
-# SFML debug/log files
-sfml-app
-
-# macOS specific
-.DS_Store
-
-# Windows specific
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+!.vscode/settings.json # Keep settings if needed
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 # CLion
 .idea/
 cmake-build-*/
 
-# Ignore any local assets you don't want in the repo
-assets/*.psd
-assets/*.xcf
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+*.xcsettings
 
+# Eclipse
+.settings/
+.project
+.cproject
+.metadata/
+
+# --- System Files ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+
+# --- Temporary Files ---
+*.tmp
+*.bak
+*.swp
+*~.nib
+*.log
+*.pid
+*.seed
+
+# --- Package Manager Files ---
+# Conan
+conan.lock
+conanbuildinfo.txt
+
+# vcpkg
+vcpkg_installed/
+
+# --- Environment Files ---
+.env
+.venv
+venv/
+env/
+ENV/
+
+# --- Documentation ---
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+
+# --- Special Cases ---
+# Keep placeholder files in empty directories
+!.gitkeep
+!README.md
+
+# --- Assets (if needed) ---
+# Uncomment if you don't want to track generated assets
+# /assets/*.png
+# /assets/*.jpg
+# /assets/*.wav
+# /assets/*.ttf

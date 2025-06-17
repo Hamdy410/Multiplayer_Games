@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game() : window(sf::VideoMode(800, 600), "SFML Project")
+Game::Game() : window(sf::VideoMode(800, 600), "New Hello, SFML")
 {
     window.setFramerateLimit(60);
 }

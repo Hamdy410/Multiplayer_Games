@@ -1,32 +1,71 @@
-cmake_minimum_required(VERSION 3.16)
-project(SFMLApp LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.15)
+project(SFML-App LANGUAGES CXX)
 
-# Set C++17
+set(EXECUTABLE_NAME sfml-app)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Set output binary name
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+# Output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# Add source files
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+# Find SFML
+find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
 
 # Include headers
 include_directories(include)
 
-# Add the executable
-add_executable(sfml-app ${SOURCES})
+# Source files from multiple directories
+file(GLOB_RECURSE SOURCES 
+    "src/core/*.cpp"
+    "src/ui/*.cpp"
+    "src/games/*.cpp"
+)
 
-# Platform-specific SFML linking
-if (WIN32)
-    # Use vcpkg or precompiled SFML
-    find_package(SFML 2.5 COMPONENTS system window graphics REQUIRED)
-    target_link_libraries(sfml-app PRIVATE sfml-graphics sfml-window sfml-system)
-elseif(UNIX)
-    # Linux: use pkg-config
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(SFML REQUIRED sfml-graphics sfml-window sfml-system)
-    include_directories(${SFML_INCLUDE_DIRS})
-    target_link_libraries(sfml-app PRIVATE ${SFML_LIBRARIES})
+add_executable(${EXECUTABLE_NAME} ${SOURCES})
+
+# Link SFML
+target_link_libraries(${EXECUTABLE_NAME} PRIVATE
+    sfml-system
+    sfml-window
+    sfml-graphics
+)
+
+# Copy all assets recursively
+add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/src/assets
+        $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/assets
+)
+
+# Windows DLL handling
+if(WIN32)
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sfml-system> $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sfml-window> $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sfml-graphics> $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+    )
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+        WIN32_EXECUTABLE ON
+        LINK_FLAGS "/SUBSYSTEM:WINDOWS"
+    )
 endif()
+
+# macOS bundle configuration
+if(APPLE)
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+        MACOSX_BUNDLE ON
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/Info.plist
+    )
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/src/assets
+            $<TARGET_BUNDLE_DIR:${EXECUTABLE_NAME}>/Contents/Resources
+    )
+endif()
+
+# Optimize file globbing
+set_source_files_properties(${SOURCES} PROPERTIES SKIP_UNITY_BUILD ON)
 
