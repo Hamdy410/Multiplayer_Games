@@ -22,6 +22,7 @@ file(GLOB_RECURSE SOURCES
     "src/core/*.cpp"
     "src/ui/*.cpp"
     "src/games/*.cpp"
+    "src/states/*.cpp"
 )
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES})

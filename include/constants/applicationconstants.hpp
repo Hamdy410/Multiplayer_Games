@@ -3,9 +3,9 @@
 namespace ApplicationConstants {
     // Window settings
     namespace Window {
-        constexpr int DEFAULT_WIDTH = 800;
-        constexpr int DEFAULT_HEIGHT = 600;
-        constexpr int FRAMERATE_LIMIT = 60;
+        constexpr float DEFAULT_WIDTH = 800;
+        constexpr float DEFAULT_HEIGHT = 600;
+        constexpr float FRAMERATE_LIMIT = 60;
         constexpr char TITLE[] = "Multi-Player Games Collection";
     }
     
