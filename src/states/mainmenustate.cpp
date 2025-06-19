@@ -1,5 +1,7 @@
 #include <states/mainmenustate.hpp>
+#include <states/gamestate.hpp>
 #include <core/statemanager.hpp>
+#include <games/xo/xogame.hpp>
 #include <constants/mainmenuconstants.hpp>
 #include <constants/applicationconstants.hpp>
 #include <constants/gamecardconstants.hpp>
@@ -110,8 +112,14 @@ void MainMenuState::setupGameCards() {
     card->setDescription(MenuConst::XO_CARD_DESCRIPTION);
     card->setOnClick([this]() {
         std::cout << "Tic-Tac-Toe game selected!" << std::endl;
-        // Future: Transition to XO game state
-        // m_stateManager->pushState(std::make_unique<XOGameState>(m_window, m_stateManager, m_sharedFont));
+        
+        // Create XO game object and pass to general GameState
+        auto xoGame = std::make_unique<XOGame>();
+        m_stateManager->pushState(
+                std::make_unique<GameState>(m_window, m_stateManager, 
+                m_sharedFont, std::move(xoGame)
+            )
+        );
     });
     
     m_ScrollableArea->addCard(std::move(card));
