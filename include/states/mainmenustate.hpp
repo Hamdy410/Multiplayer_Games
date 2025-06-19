@@ -3,6 +3,7 @@
 
 #include <core/basestate.hpp>
 #include <ui/gamecard.hpp>
+#include <ui/scrollablecontentarea.hpp>
 #include <vector>
 #include <memory>
 
@@ -10,7 +11,7 @@ class MainMenuState : public BaseState
 {
     private:
         int m_currentPatternIndex;
-        std::vector<std::unique_ptr<GameCard>> m_gameCards;
+        std::unique_ptr<ScrollableContentArea> m_ScrollableArea;
         std::vector<std::unique_ptr<sf::Texture>> m_cardTextures;
 
         void cycleBackgroundPattern();

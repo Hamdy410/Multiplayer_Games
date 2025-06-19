@@ -1,11 +1,13 @@
 #include <states/mainmenustate.hpp>
 #include <core/statemanager.hpp>
 #include <constants/mainmenuconstants.hpp>
+#include <constants/applicationconstants.hpp>
 #include <constants/gamecardconstants.hpp>
 #include <iostream>
 
 namespace MenuConst = MainMenuConstants;
 namespace CardConst = GameCardConstants;
+namespace AppConst = ApplicationConstants;
 
 MainMenuState::MainMenuState(sf::RenderWindow* window, StateManager* stateManager, sf::Font* font)
     : BaseState(window, stateManager, font), m_currentPatternIndex(0) {
@@ -14,12 +16,21 @@ MainMenuState::MainMenuState(sf::RenderWindow* window, StateManager* stateManage
     setupTitle(MenuConst::MAIN_TITLE);
     setBackgroundPattern(PatternType::GRID_FADE, MenuConst::PATTERN_SPEEDS[0]);
 
+    // Create the Scrollable Content Area
+    sf::FloatRect contentBounds(
+        AppConst::UI::GAME_AREA_X, 
+        AppConst::UI::GAME_AREA_Y,
+        AppConst::UI::GAME_AREA_WIDTH,
+        AppConst::UI::GAME_AREA_HEIGHT
+    );
+    m_ScrollableArea = std::make_unique<ScrollableContentArea> (m_window, contentBounds);
+
     setupInstructionText(MenuConst::INSTRUCTION_TEXT);
 
     // Position instruction text below the content area
     sf::FloatRect instrBounds = m_instructionText.getLocalBounds();
     m_instructionText.setPosition(
-        (MenuConst::INSTRUCTION_TEXT_POSITION_X - instrBounds.width) / 2,
+        (AppConst::Window::DEFAULT_WIDTH - instrBounds.width) / 2,
         MenuConst::INSTRUCTION_TEXT_POSITION_Y
     );
 
@@ -35,13 +46,11 @@ void MainMenuState::handleEvent(const sf::Event& event) {
             cycleBackgroundPattern();
     }
 
-    for (auto& card : m_gameCards)
-        card->handleEvent(event, *m_window);
+    m_ScrollableArea->handleEvent(event);
 }
 
 void MainMenuState::update(float deltaTime) {
-    for (auto& card : m_gameCards)
-        card->update(deltaTime);
+    m_ScrollableArea->update(deltaTime);
 }
 
 void MainMenuState::draw() {
@@ -53,8 +62,7 @@ void MainMenuState::draw() {
     m_window->draw(m_titleText);
     m_window->draw(m_instructionText);
 
-    for (auto& card : m_gameCards)
-        card->draw(*m_window);
+    m_ScrollableArea->draw();
 }
 
 void MainMenuState::onEnter() {
@@ -79,45 +87,42 @@ void MainMenuState::cycleBackgroundPattern() {
     std::cout << "Switched to pattern: " << m_currentPatternIndex << std::endl;
 }
 
-void MainMenuState::setupGameCards()
-{
-    // Example for Tic-Tac-Toe
-    // Requires further modulation for scalability
-    auto texture = std::make_unique<sf::Texture>();
-    if (!texture->loadFromFile(MenuConst::XO_CARD_IMAGE_PATH))
-    {
+void MainMenuState::setupGameCards() {
+    const int numberOfCards = 12;
+    
+    std::vector<std::string> gameNames = {
+        "Tic-Tac-Toe", "Chess", "Checkers", "Connect Four", "Battleship", 
+        "Reversi", "Sudoku", "Minesweeper", "Tetris", "Snake", "Pong", "Breakout"
+    };
+    
+    std::vector<sf::Color> colors = {
+        sf::Color::Blue, sf::Color::Red, sf::Color::Green, sf::Color::Yellow,
+        sf::Color::Cyan, sf::Color::Magenta, sf::Color(255, 165, 0),
+        sf::Color(128, 0, 128), sf::Color(255, 192, 203),
+        sf::Color(0, 128, 0), sf::Color(128, 128, 128), sf::Color(255, 20, 147)
+    };
+
+    for (int i = 0; i < numberOfCards; ++i) {
+        auto texture = std::make_unique<sf::Texture>();
         sf::Image placeholder;
-        placeholder.create(
-            CardConst::PLACEHOLDER_SIZE,
-            CardConst::PLACEHOLDER_SIZE,
-            sf::Color(
-                CardConst::PLACEHOLDER_COLOR_R,
-                CardConst::PLACEHOLDER_COLOR_G,
-                CardConst::PLACEHOLDER_COLOR_B
-            )
-        );
+        placeholder.create(CardConst::PLACEHOLDER_SIZE, CardConst::PLACEHOLDER_SIZE, 
+                          colors[i % colors.size()]);
         texture->loadFromImage(placeholder);
-        std::cout << "Warning: Could not load xo_card.png, using placeholder\n";
+        m_cardTextures.push_back(std::move(texture));
+
+        auto card = std::make_unique<GameCard>(
+            sf::Vector2f(0, 0), // Initial position - will be set by ScrollableContentArea
+            sf::Vector2f(MenuConst::CARD_WIDTH, MenuConst::CARD_HEIGHT),
+            m_sharedFont
+        );
+        
+        card->setTexture(m_cardTextures.back().get());
+        card->setTitle(gameNames[i % gameNames.size()]);
+        card->setDescription("Game #" + std::to_string(i + 1)); // This should show 1, 2, 3, etc.
+        card->setOnClick([this, i]() { // Capture i directly
+            std::cout << "Game #" << (i + 1) << " clicked!" << std::endl;
+        });
+        
+        m_ScrollableArea->addCard(std::move(card));
     }
-    m_cardTextures.push_back(std::move(texture));
-
-    auto card = std::make_unique<GameCard>(
-        sf::Vector2f(
-            MenuConst::CARD_POSITION_X, MenuConst::CARD_POSITION_Y
-        ),
-        sf::Vector2f(
-            MenuConst::CARD_WIDTH, MenuConst::CARD_HEIGHT
-        ),
-        m_sharedFont
-    );
-    card->setTexture(m_cardTextures.back().get());
-    card->setTitle(MenuConst::XO_CARD_TITLE);
-    card->setDescription(MenuConst::XO_CARD_DESCRIPTION);
-    card->setOnClick([this] () {
-        std::cout << "XO Game Clicked!" << std::endl;
-        // Push XO game state here
-    });
-    m_gameCards.push_back(std::move(card));
-
-    // Add more cards for other games as needed...
 }

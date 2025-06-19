@@ -94,6 +94,40 @@ void GameCard::setOnClick(std::function<void()> callback)
     m_onClick = callback;
 }
 
+void GameCard::setPosition(const sf::Vector2f& position) {
+    m_position = position;
+    
+    // Update background
+    m_background.setPosition(m_position);
+    
+    // Recalculate and update icon position
+    if (m_texture) {
+        float scale = std::min(
+            m_size.x * CardConst::ICON_SCALE_WIDTH_FACTOR / m_texture->getSize().x,
+            m_size.y * CardConst::ICON_SCALE_HEIGHT_FACTOR / m_texture->getSize().y
+        );
+        m_icon.setPosition(
+            m_position.x + (m_size.x - m_texture->getSize().x * scale) / 2,
+            m_position.y + CardConst::ICON_POSITION_Y_OFFSET
+        );
+    }
+    
+    // Recalculate title position
+    auto titleBounds = m_title.getLocalBounds();
+    m_title.setPosition(
+        m_position.x + (m_size.x - titleBounds.width) / 2,
+        m_position.y + m_size.y - CardConst::TITLE_POSITION_Y_OFFSET
+    );
+    
+    // Recalculate description position
+    auto descBounds = m_description.getLocalBounds();
+    m_description.setPosition(
+        m_position.x + (m_size.x - descBounds.width) / 2,
+        m_position.y + m_size.y * CardConst::DESCRIPTION_POSITION_Y_FACTOR
+    );
+}
+
+
 void GameCard::handleEvent(const sf::Event& event, const sf::RenderWindow& window)
 {
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));

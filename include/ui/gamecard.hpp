@@ -29,6 +29,7 @@ class GameCard
         void setTitle(const std::string& title);
         void setDescription(const std::string& desc);
         void setOnClick(std::function<void()> callback);
+        void setPosition(const sf::Vector2f& position);
 
         void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
         void update(float dt);
