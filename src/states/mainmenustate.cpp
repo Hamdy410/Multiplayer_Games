@@ -1,21 +1,26 @@
 #include <states/mainmenustate.hpp>
 #include <core/statemanager.hpp>
+#include <constants/mainmenuconstants.hpp>
+#include <constants/gamecardconstants.hpp>
 #include <iostream>
+
+namespace MenuConst = MainMenuConstants;
+namespace CardConst = GameCardConstants;
 
 MainMenuState::MainMenuState(sf::RenderWindow* window, StateManager* stateManager, sf::Font* font)
     : BaseState(window, stateManager, font), m_currentPatternIndex(0) {
     
     // Setup the UI elements using the base class methods
-    setupTitle("Multi-Player Games Collection");
-    setBackgroundPattern(PatternType::GRID_FADE, 0.3f);
+    setupTitle(MenuConst::MAIN_TITLE);
+    setBackgroundPattern(PatternType::GRID_FADE, MenuConst::PATTERN_SPEEDS[0]);
 
-    setupInstructionText("SPACE: Change Background • ESC: Exit");
+    setupInstructionText(MenuConst::INSTRUCTION_TEXT);
 
     // Position instruction text below the content area
     sf::FloatRect instrBounds = m_instructionText.getLocalBounds();
     m_instructionText.setPosition(
-        (800 - instrBounds.width) / 2,
-        530
+        (MenuConst::INSTRUCTION_TEXT_POSITION_X - instrBounds.width) / 2,
+        MenuConst::INSTRUCTION_TEXT_POSITION_Y
     );
 
     setupGameCards();
@@ -64,11 +69,12 @@ void MainMenuState::cycleBackgroundPattern() {
         PatternType::MATRIX_RAIN
     };
     
-    m_currentPatternIndex = (m_currentPatternIndex + 1) % 4;
+    m_currentPatternIndex = (m_currentPatternIndex + 1) % MenuConst::PATTERN_COUNT;
     
-    // Set different speeds for different patterns
-    float speeds[] = {0.2f, 0.5f, 0.7f, 0.8f};
-    setBackgroundPattern(patterns[m_currentPatternIndex], speeds[m_currentPatternIndex]);
+    setBackgroundPattern(
+        patterns[m_currentPatternIndex],
+        MenuConst::PATTERN_SPEEDS[m_currentPatternIndex]
+    );
     
     std::cout << "Switched to pattern: " << m_currentPatternIndex << std::endl;
 }
@@ -78,23 +84,35 @@ void MainMenuState::setupGameCards()
     // Example for Tic-Tac-Toe
     // Requires further modulation for scalability
     auto texture = std::make_unique<sf::Texture>();
-    if (!texture->loadFromFile("assets/images/xo_card.png"))
+    if (!texture->loadFromFile(MenuConst::XO_CARD_IMAGE_PATH))
     {
         sf::Image placeholder;
-        placeholder.create(64, 64, sf::Color::Blue);
+        placeholder.create(
+            CardConst::PLACEHOLDER_SIZE,
+            CardConst::PLACEHOLDER_SIZE,
+            sf::Color(
+                CardConst::PLACEHOLDER_COLOR_R,
+                CardConst::PLACEHOLDER_COLOR_G,
+                CardConst::PLACEHOLDER_COLOR_B
+            )
+        );
         texture->loadFromImage(placeholder);
         std::cout << "Warning: Could not load xo_card.png, using placeholder\n";
     }
     m_cardTextures.push_back(std::move(texture));
 
     auto card = std::make_unique<GameCard>(
-        sf::Vector2f(120, 200),
-        sf::Vector2f(180, 230),
+        sf::Vector2f(
+            MenuConst::CARD_POSITION_X, MenuConst::CARD_POSITION_Y
+        ),
+        sf::Vector2f(
+            MenuConst::CARD_WIDTH, MenuConst::CARD_HEIGHT
+        ),
         m_sharedFont
     );
     card->setTexture(m_cardTextures.back().get());
-    card->setTitle("Tic-Tac-Toe");
-    card->setDescription("Classic XO game");
+    card->setTitle(MenuConst::XO_CARD_TITLE);
+    card->setDescription(MenuConst::XO_CARD_DESCRIPTION);
     card->setOnClick([this] () {
         std::cout << "XO Game Clicked!" << std::endl;
         // Push XO game state here

@@ -1,4 +1,7 @@
 #include <ui/gamecard.hpp>
+#include <constants/gamecardconstants.hpp>
+
+namespace CardConst = GameCardConstants;
 
 GameCard::GameCard(const sf::Vector2f& position, const sf::Vector2f& size,
     sf::Font* font)
@@ -6,17 +9,45 @@ GameCard::GameCard(const sf::Vector2f& position, const sf::Vector2f& size,
 {
     m_background.setPosition(m_position);
     m_background.setSize(m_size);
-    m_background.setFillColor(sf::Color(40, 40, 60, 200));
-    m_background.setOutlineThickness(2.0f);
-    m_background.setOutlineColor(sf::Color(100, 150, 255, 200));
+    m_background.setFillColor(
+        sf::Color(
+            CardConst::BACKGROUND_FILL_COLOR_R,
+            CardConst::BACKGROUND_FILL_COLOR_G,
+            CardConst::BACKGROUND_FILL_COLOR_B,
+            CardConst::BACKGROUND_FILL_COLOR_A
+        )
+    );
+    m_background.setOutlineThickness(CardConst::BACKGROUND_OUTLINE_THICKNESS);
+    m_background.setOutlineColor(
+        sf::Color(
+            CardConst::BACKGROUND_OUTLINE_COLOR_R,
+            CardConst::BACKGROUND_OUTLINE_COLOR_G,
+            CardConst::BACKGROUND_OUTLINE_COLOR_B,
+            CardConst::BACKGROUND_OUTLINE_COLOR_A
+        )
+    );
 
     m_title.setFont(*m_font);
-    m_title.setCharacterSize(22);
-    m_title.setFillColor(sf::Color(180, 180, 180));
+    m_title.setCharacterSize(CardConst::TITLE_CHARACTER_SIZE);
+    m_title.setFillColor(
+        sf::Color(
+            CardConst::TITLE_FILL_COLOR_R,
+            CardConst::TITLE_FILL_COLOR_G,
+            CardConst::TITLE_FILL_COLOR_B,
+            CardConst::TITLE_FILL_COLOR_A
+        )
+    );
 
     m_description.setFont(*m_font);
-    m_description.setCharacterSize(16);
-    m_description.setFillColor(sf::Color(180, 180, 180));
+    m_description.setCharacterSize(CardConst::DESCRIPTION_CHARACTER_SIZE);
+    m_description.setFillColor(
+        sf::Color(
+            CardConst::DESCRIPTION_FILL_COLOR_R,
+            CardConst::DESCRIPTION_FILL_COLOR_G,
+            CardConst::DESCRIPTION_FILL_COLOR_B,
+            CardConst::DESCRIPTION_FILL_COLOR_A
+        )
+    );
 }
 
 void GameCard::setTexture(sf::Texture* texture)
@@ -27,13 +58,13 @@ void GameCard::setTexture(sf::Texture* texture)
         m_icon.setTexture(*m_texture);
         // Scale icon to fit card (leaving some space for text)
         float scale = std::min(
-            m_size.x * 0.85f / m_texture->getSize().x,
-            m_size.y * 0.6f / m_texture->getSize().y
+            m_size.x * CardConst::ICON_SCALE_WIDTH_FACTOR / m_texture->getSize().x,
+            m_size.y * CardConst::ICON_SCALE_HEIGHT_FACTOR / m_texture->getSize().y
         );
         m_icon.setScale(scale, scale);
         m_icon.setPosition(
             m_position.x + (m_size.x - m_texture->getSize().x * scale) / 2,
-            m_position.y + 10
+            m_position.y + CardConst::ICON_POSITION_Y_OFFSET
         );
     }
 }
@@ -44,7 +75,7 @@ void GameCard::setTitle(const std::string& title)
     auto bounds = m_title.getLocalBounds();
     m_title.setPosition(
         m_position.x + (m_size.x - bounds.width) / 2,
-        m_position.y + m_size.y * 0.65f
+        m_position.y + m_size.y * CardConst::TITLE_POSITION_Y_OFFSET
     );
 }
 
@@ -54,7 +85,7 @@ void GameCard::setDescription(const std::string& desc)
     auto bounds = m_description.getLocalBounds();
     m_description.setPosition(
         m_position.x + (m_size.x - bounds.width) / 2,
-        m_position.y + m_size.y * 0.85f
+        m_position.y + m_size.y * CardConst::DESCRIPTION_POSITION_Y_FACTOR
     );
 }
 
@@ -80,10 +111,6 @@ void GameCard::handleEvent(const sf::Event& event, const sf::RenderWindow& windo
 
 void GameCard::update(float)
 {
-    m_background.setFillColor(
-        m_isHovered ? sf::Color(60, 60, 90, 230) : sf::Color(40, 40, 60, 200)
-    );
-
     updateVisuals();
 }
 
@@ -104,13 +131,27 @@ void GameCard::updateVisuals()
 {
     if (m_isHovered)
     {
-        m_background.setOutlineColor(sf::Color(150, 200, 255, 255));
-        m_background.setOutlineThickness(3.0f);
+        m_background.setOutlineColor(
+            sf::Color(
+                CardConst::HOVERED_OUTLINE_COLOR_R,
+                CardConst::HOVERED_BACKGROUND_FILL_COLOR_G,
+                CardConst::HOVERED_BACKGROUND_FILL_COLOR_B,
+                CardConst::BACKGROUND_FILL_COLOR_A
+            )
+        );
+        m_background.setOutlineThickness(CardConst::HOVERED_OUTLINE_THICKNESS);
     }
     else
     {
-        m_background.setOutlineColor(sf::Color(100, 150, 255, 200));
-        m_background.setOutlineThickness(2.0f);
+        m_background.setOutlineColor(
+            sf::Color(
+                CardConst::NORMAL_OUTLINE_COLOR_G,
+                CardConst::NORMAL_OUTLINE_COLOR_G,
+                CardConst::BACKGROUND_OUTLINE_COLOR_B,
+                CardConst::BACKGROUND_OUTLINE_COLOR_A
+            )
+        );
+        m_background.setOutlineThickness(CardConst::NORMAL_OUTLINE_THICKNESS);
     }
 }
 
