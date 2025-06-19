@@ -7,24 +7,36 @@ MainMenuState::MainMenuState(sf::RenderWindow* window, StateManager* stateManage
     
     // Setup the UI elements using the base class methods
     setupTitle("Multi-Player Games Collection");
-    setupInstructionText("Game cards will appear here\nPress SPACE to change background pattern\nPress ESC to exit");
     setBackgroundPattern(PatternType::GRID_FADE, 0.3f);
+
+    setupInstructionText("SPACE: Change Background • ESC: Exit");
+
+    // Position instruction text below the content area
+    sf::FloatRect instrBounds = m_instructionText.getLocalBounds();
+    m_instructionText.setPosition(
+        (800 - instrBounds.width) / 2,
+        530
+    );
+
+    setupGameCards();
 }
 
 void MainMenuState::handleEvent(const sf::Event& event) {
-    if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::Escape) {
+    if (event.type == sf::Event::KeyPressed)
+    {
+        if (event.key.code == sf::Keyboard::Escape)
             m_window->close();
-        }
-        if (event.key.code == sf::Keyboard::Space) {
+        if (event.key.code == sf::Keyboard::Space)
             cycleBackgroundPattern();
-        }
     }
+
+    for (auto& card : m_gameCards)
+        card->handleEvent(event, *m_window);
 }
 
 void MainMenuState::update(float deltaTime) {
-    // Currently no specific updates needed for main menu
-    // The background pattern updates are handled in drawBackground()
+    for (auto& card : m_gameCards)
+        card->update(deltaTime);
 }
 
 void MainMenuState::draw() {
@@ -35,6 +47,9 @@ void MainMenuState::draw() {
     m_window->draw(m_contentArea);
     m_window->draw(m_titleText);
     m_window->draw(m_instructionText);
+
+    for (auto& card : m_gameCards)
+        card->draw(*m_window);
 }
 
 void MainMenuState::onEnter() {
@@ -56,4 +71,35 @@ void MainMenuState::cycleBackgroundPattern() {
     setBackgroundPattern(patterns[m_currentPatternIndex], speeds[m_currentPatternIndex]);
     
     std::cout << "Switched to pattern: " << m_currentPatternIndex << std::endl;
+}
+
+void MainMenuState::setupGameCards()
+{
+    // Example for Tic-Tac-Toe
+    // Requires further modulation for scalability
+    auto texture = std::make_unique<sf::Texture>();
+    if (!texture->loadFromFile("assets/images/xo_card.png"))
+    {
+        sf::Image placeholder;
+        placeholder.create(64, 64, sf::Color::Blue);
+        texture->loadFromImage(placeholder);
+        std::cout << "Warning: Could not load xo_card.png, using placeholder\n";
+    }
+    m_cardTextures.push_back(std::move(texture));
+
+    auto card = std::make_unique<GameCard>(
+        sf::Vector2f(120, 200),
+        sf::Vector2f(180, 230),
+        m_sharedFont
+    );
+    card->setTexture(m_cardTextures.back().get());
+    card->setTitle("Tic-Tac-Toe");
+    card->setDescription("Classic XO game");
+    card->setOnClick([this] () {
+        std::cout << "XO Game Clicked!" << std::endl;
+        // Push XO game state here
+    });
+    m_gameCards.push_back(std::move(card));
+
+    // Add more cards for other games as needed...
 }
