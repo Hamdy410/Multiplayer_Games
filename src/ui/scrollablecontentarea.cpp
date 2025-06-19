@@ -1,16 +1,22 @@
 #include <ui/scrollablecontentarea.hpp>
 #include <constants/mainmenuconstants.hpp>
+#include <constants/scrollablecontentareaconstants.hpp>
 #include <algorithm>
 #include <iostream>
 
 namespace MenuConst = MainMenuConstants;
+namespace ScrollConst = ScrollableContentAreaConstants;
 
 ScrollableContentArea::ScrollableContentArea(
     sf::RenderWindow* window, const sf::FloatRect& bounds
 ) 
-: m_window(window), m_bounds(bounds), m_scrollOffset(0.0f),
-m_maxScrollOffset(0.0f), m_scrollSpeed(30.0f), m_cardsPerRow(1),
-m_cardSpacing(25.0f), m_totalContentHeight(0.0f)
+: m_window(window), m_bounds(bounds),
+m_scrollOffset(ScrollConst::INITIAL_SCROLL_OFFSET),
+m_maxScrollOffset(ScrollConst::INITIAL_MAX_SCROLL_OFFSET),
+m_scrollSpeed(ScrollConst::DEFAULT_SCROLL_SPEED),
+m_cardsPerRow(ScrollConst::INITIAL_CARDS_PER_ROW),
+m_cardSpacing(ScrollConst::DEFAULT_CARD_SPACING),
+m_totalContentHeight(ScrollConst::INITIAL_TOTAL_CONTENT_HEIGHT)
 {
     // Setup clipping view
     m_contentView.reset(m_bounds);
@@ -31,23 +37,14 @@ void ScrollableContentArea::calculateGridLayout() {
     }
     
     // Calculate cards per row based on available width
-    float availableWidth = m_bounds.width - (m_cardSpacing * 2);
+    float availableWidth = m_bounds.width - (m_cardSpacing * ScrollConst::SPACING_MULTIPLIER);
     float cardWidth = MenuConst::CARD_WIDTH;
     m_cardsPerRow = static_cast<int>((availableWidth + m_cardSpacing) / (cardWidth + m_cardSpacing));
-    m_cardsPerRow = std::max(1, m_cardsPerRow);
+    m_cardsPerRow = std::max(ScrollConst::MIN_CARDS_PER_ROW, m_cardsPerRow);
     
     // Calculate total content height
     int rows = (m_cards.size() + m_cardsPerRow - 1) / m_cardsPerRow;
-    m_totalContentHeight = (rows * MenuConst::CARD_HEIGHT) + ((rows - 1) * m_cardSpacing) + (m_cardSpacing * 2);
-    
-    // Debug output
-    std::cout << "Grid Layout Debug:" << std::endl;
-    std::cout << "  Available width: " << availableWidth << std::endl;
-    std::cout << "  Card width: " << cardWidth << std::endl;
-    std::cout << "  Cards per row: " << m_cardsPerRow << std::endl;
-    std::cout << "  Total cards: " << m_cards.size() << std::endl;
-    std::cout << "  Rows: " << rows << std::endl;
-    std::cout << "  Total content height: " << m_totalContentHeight << std::endl;
+    m_totalContentHeight = (rows * MenuConst::CARD_HEIGHT) + ((rows - 1) * m_cardSpacing) + (m_cardSpacing * ScrollConst::SPACING_MULTIPLIER);
     
     updateScrollLimits();
     updateCardPositions();
