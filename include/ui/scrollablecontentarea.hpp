@@ -33,7 +33,6 @@ class ScrollableContentArea
 
         // Enhanced visibility checking
         bool isCardVisible(const GameCard& card) const;
-        sf::FloatRect
 
     public:
         ScrollableContentArea(sf::RenderWindow* window, const sf::FloatRect& bounds);
