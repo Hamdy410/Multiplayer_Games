@@ -75,7 +75,7 @@ void GameCard::setTitle(const std::string& title)
     auto bounds = m_title.getLocalBounds();
     m_title.setPosition(
         m_position.x + (m_size.x - bounds.width) / 2,
-        m_position.y + m_size.y * CardConst::TITLE_POSITION_Y_OFFSET
+        m_position.y + m_size.y * CardConst::TITLE_POSITION_Y_FACTOR
     );
 }
 
@@ -116,7 +116,7 @@ void GameCard::setPosition(const sf::Vector2f& position) {
     auto titleBounds = m_title.getLocalBounds();
     m_title.setPosition(
         m_position.x + (m_size.x - titleBounds.width) / 2,
-        m_position.y + m_size.y - CardConst::TITLE_POSITION_Y_OFFSET
+        m_position.y + m_size.y * CardConst::TITLE_POSITION_Y_FACTOR
     );
     
     // Recalculate description position

@@ -33,7 +33,7 @@ namespace GameCardConstants {
     constexpr float ICON_POSITION_Y_OFFSET = 10.0f;
 
     // Text positioning
-    constexpr float TITLE_POSITION_Y_OFFSET = 0.65f;  // From bottom
+    constexpr float TITLE_POSITION_Y_FACTOR = 0.65f;  // From bottom
     constexpr float DESCRIPTION_POSITION_Y_FACTOR = 0.75f;
 
     // Hover states

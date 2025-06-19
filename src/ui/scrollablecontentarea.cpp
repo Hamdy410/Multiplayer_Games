@@ -61,16 +61,12 @@ void ScrollableContentArea::updateScrollLimits()
 
 void ScrollableContentArea::updateCardPositions() {
     if (m_cards.empty()) return;
+
+    m_cardPositions.resize(m_cards.size());
     
     float actualGridWidth = (m_cardsPerRow * MenuConst::CARD_WIDTH) + ((m_cardsPerRow - 1) * m_cardSpacing);
     float startX = m_bounds.left + (m_bounds.width - actualGridWidth) / 2;
     float startY = m_bounds.top + m_cardSpacing - m_scrollOffset;
-    
-    std::cout << "Position Update Debug:" << std::endl;
-    std::cout << "  Actual grid width: " << actualGridWidth << std::endl;
-    std::cout << "  Start X: " << startX << std::endl;
-    std::cout << "  Start Y: " << startY << std::endl;
-    std::cout << "  Bounds: (" << m_bounds.left << ", " << m_bounds.top << ", " << m_bounds.width << ", " << m_bounds.height << ")" << std::endl;
     
     for (size_t i = 0; i < m_cards.size(); ++i) {
         int row = i / m_cardsPerRow;
@@ -112,32 +108,36 @@ void ScrollableContentArea::handleEvent(const sf::Event& event)
         scrollBy(-event.mouseWheelScroll.delta * m_scrollSpeed);
     
     // Forward events to visible cards only
-    for (auto& card : m_cards)
-        if (isCardVisible(*card))
-            card->handleEvent(event, *m_window);
+    for (size_t i = 0; i < m_cards.size(); i++)
+        if (isCardVisible(i))
+            m_cards[i]->handleEvent(event, *m_window);
 }
 
 void ScrollableContentArea::update(float deltaTime)
 {
     // Update only visible cards for performance
-    for (auto& card : m_cards)
-        if (isCardVisible(*card))
-            card->update(deltaTime);
+    for (size_t i = 0; i < m_cards.size(); ++i)
+        if (isCardVisible(i))
+            m_cards[i]->update(deltaTime);
 }
 
 void ScrollableContentArea::draw() {
-    // Temporarily disable view clipping to see if cards are positioned correctly
-    // sf::View originalView = m_window->getView();
-    // m_window->setView(m_contentView);
-    
-    std::cout << "Drawing " << m_cards.size() << " cards" << std::endl;
-    
-    for (size_t i = 0; i < m_cards.size(); ++i) {
-        std::cout << "Drawing card " << i << std::endl;
-        m_cards[i]->draw(*m_window);
-    }
-    
-    // m_window->setView(originalView);
+    sf::View originalView = m_window->getView();
+    m_window->setView(m_contentView);
+
+    int visibleCards = 0;
+
+    for (size_t i = 0; i < m_cards.size(); i++)
+        if (isCardVisible(i))
+        {
+            m_cards[i]->draw(*m_window);
+            visibleCards++;
+        }
+
+    if (visibleCards != static_cast<int>(m_cards.size()))
+        std::cout << "Rendering " << visibleCards << " out of " << m_cards.size() << " cards" << std::endl;
+
+    m_window->setView(originalView);
 }
 
 void ScrollableContentArea::scrollTo(float offset)
@@ -151,8 +151,27 @@ void ScrollableContentArea::scrollBy(float delta)
     scrollTo(m_scrollOffset + delta);
 }
 
-bool ScrollableContentArea::isCardVisible(const GameCard& card) const {
-    // Simple visibility check - can be optimized further
-    // For now, assume all cards are visible (the view clipping handles the rest)
-    return true;
+bool ScrollableContentArea::isCardVisible(size_t cardIndex) const
+{
+    if (cardIndex >= m_cardPositions.size() || cardIndex < 0) return false;
+
+    sf::Vector2f cardPos = m_cardPositions[cardIndex];
+
+    // Card bounds
+    float cardLeft = cardPos.x;
+    float cardTop = cardPos.y;
+    float cardRight = cardPos.x + MenuConst::CARD_WIDTH;
+    float cardBottom = cardPos.y + MenuConst::CARD_HEIGHT;
+
+    // Content Area bounds
+    float contentLeft = m_bounds.left;
+    float contentTop = m_bounds.top;
+    float contentRight = m_bounds.left + m_bounds.width;
+    float contentBottom = m_bounds.top + m_bounds.height;
+
+    // Check the intersection using algorithm provided by perplexity
+    bool horizontalOverlap = (cardLeft < contentRight) && (cardRight > contentLeft);
+    bool verticalOverlap = (cardTop < contentBottom) && (cardBottom > contentTop);
+    
+    return horizontalOverlap && verticalOverlap;
 }

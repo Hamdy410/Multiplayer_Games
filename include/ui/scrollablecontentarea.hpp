@@ -23,6 +23,7 @@ class ScrollableContentArea
         int m_cardsPerRow;
         float m_cardSpacing;
         float m_totalContentHeight;
+        std::vector<sf::Vector2f> m_cardPositions;  // Track card positions
 
         // Content
         std::vector<std::unique_ptr<GameCard>> m_cards;
@@ -32,7 +33,7 @@ class ScrollableContentArea
         void updateCardPositions();
 
         // Enhanced visibility checking
-        bool isCardVisible(const GameCard& card) const;
+        bool isCardVisible(size_t cardIndex) const;
 
     public:
         ScrollableContentArea(sf::RenderWindow* window, const sf::FloatRect& bounds);

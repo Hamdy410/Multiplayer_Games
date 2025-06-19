@@ -88,41 +88,33 @@ void MainMenuState::cycleBackgroundPattern() {
 }
 
 void MainMenuState::setupGameCards() {
-    const int numberOfCards = 12;
-    
-    std::vector<std::string> gameNames = {
-        "Tic-Tac-Toe", "Chess", "Checkers", "Connect Four", "Battleship", 
-        "Reversi", "Sudoku", "Minesweeper", "Tetris", "Snake", "Pong", "Breakout"
-    };
-    
-    std::vector<sf::Color> colors = {
-        sf::Color::Blue, sf::Color::Red, sf::Color::Green, sf::Color::Yellow,
-        sf::Color::Cyan, sf::Color::Magenta, sf::Color(255, 165, 0),
-        sf::Color(128, 0, 128), sf::Color(255, 192, 203),
-        sf::Color(0, 128, 0), sf::Color(128, 128, 128), sf::Color(255, 20, 147)
-    };
-
-    for (int i = 0; i < numberOfCards; ++i) {
-        auto texture = std::make_unique<sf::Texture>();
+    // Create only the Tic-Tac-Toe card
+    auto texture = std::make_unique<sf::Texture>();
+    if (!texture->loadFromFile(MenuConst::XO_CARD_IMAGE_PATH)) {
+        // Create placeholder if image doesn't exist
         sf::Image placeholder;
-        placeholder.create(CardConst::PLACEHOLDER_SIZE, CardConst::PLACEHOLDER_SIZE, 
-                          colors[i % colors.size()]);
+        placeholder.create(CardConst::PLACEHOLDER_SIZE, CardConst::PLACEHOLDER_SIZE, sf::Color::Blue);
         texture->loadFromImage(placeholder);
-        m_cardTextures.push_back(std::move(texture));
-
-        auto card = std::make_unique<GameCard>(
-            sf::Vector2f(0, 0), // Initial position - will be set by ScrollableContentArea
-            sf::Vector2f(MenuConst::CARD_WIDTH, MenuConst::CARD_HEIGHT),
-            m_sharedFont
-        );
-        
-        card->setTexture(m_cardTextures.back().get());
-        card->setTitle(gameNames[i % gameNames.size()]);
-        card->setDescription("Game #" + std::to_string(i + 1)); // This should show 1, 2, 3, etc.
-        card->setOnClick([this, i]() { // Capture i directly
-            std::cout << "Game #" << (i + 1) << " clicked!" << std::endl;
-        });
-        
-        m_ScrollableArea->addCard(std::move(card));
+        std::cout << "Warning: Could not load xo_card.png, using placeholder" << std::endl;
     }
+    m_cardTextures.push_back(std::move(texture));
+
+    auto card = std::make_unique<GameCard>(
+        sf::Vector2f(0, 0), // Position will be managed by ScrollableContentArea
+        sf::Vector2f(MenuConst::CARD_WIDTH, MenuConst::CARD_HEIGHT),
+        m_sharedFont
+    );
+    
+    card->setTexture(m_cardTextures.back().get());
+    card->setTitle(MenuConst::XO_CARD_TITLE);
+    card->setDescription(MenuConst::XO_CARD_DESCRIPTION);
+    card->setOnClick([this]() {
+        std::cout << "Tic-Tac-Toe game selected!" << std::endl;
+        // Future: Transition to XO game state
+        // m_stateManager->pushState(std::make_unique<XOGameState>(m_window, m_stateManager, m_sharedFont));
+    });
+    
+    m_ScrollableArea->addCard(std::move(card));
+    
+    std::cout << "Created single Tic-Tac-Toe game card" << std::endl;
 }

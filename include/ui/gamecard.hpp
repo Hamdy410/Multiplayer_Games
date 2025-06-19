@@ -35,7 +35,7 @@ class GameCard
         void update(float dt);
         void draw(sf::RenderWindow& window);
 
-        bool contains(const sf::Vector2f& point) const; 
+        bool contains(const sf::Vector2f& point) const;
 };
 
 #endif  // GAMECARD_HPP
