@@ -27,18 +27,18 @@ file(GLOB_RECURSE SOURCES
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
+# Copy the entire assets directory to the build output
+add_custom_command(TARGET sfml-app POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:sfml-app>/assets
+    COMMENT "Copying assets to output directory"
+)
+
 # Link SFML
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE
     sfml-system
     sfml-window
     sfml-graphics
-)
-
-# Copy all assets recursively
-add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/src/assets
-        $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/assets
 )
 
 # Windows DLL handling

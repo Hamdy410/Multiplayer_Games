@@ -53,6 +53,6 @@ namespace ApplicationConstants {
     
     // File paths
     namespace Paths {
-        constexpr char FONT_JERSEY15[] = "../assets/fonts/Jersey15-Regular.ttf";
+        constexpr char FONT_JERSEY15[] = "assets/fonts/Jersey15-Regular.ttf";
     }
 }
