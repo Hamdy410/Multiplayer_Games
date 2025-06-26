@@ -25,8 +25,31 @@ void XOGame::update(float deltaTime)
 
 void XOGame::draw(sf::RenderWindow& window)
 {
+  
     // TODO: We will need to implement:
+
+  
     //      - Draw game board
+//----- // horizontal lines
+    sf::RectangleShape line1_h(sf::Vector2f(600.f, 5.f));
+    line1_h.setPosition(100.f, 250.f);
+    line1_h.setFillColor(sf::Color::White);
+
+    sf::RectangleShape line2_h(sf::Vector2f(600.f, 5.f));
+    line2_h.setPosition(100.f, 450.f);
+    line2_h.setFillColor(sf::Color::White);
+
+    //vertical lines
+    sf::RectangleShape line1_v(sf::Vector2f(5.f, 600.f));
+    line1_v.setPosition(300.f, 50.f);
+    line1_v.setFillColor(sf::Color::White);
+
+    sf::RectangleShape line2_v(sf::Vector2f(5.f, 600.f));
+    line2_v.setPosition(500.f, 50.f);
+    line2_v.setFillColor(sf::Color::White);
+//------------//
+
+  
     //      - Draw X and O pieces
     //      - Draw game specific UI
     std::cout << "XO Game drawing (TODO: implement)" << std::endl;
