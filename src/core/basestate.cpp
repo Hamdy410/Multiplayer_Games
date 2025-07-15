@@ -48,7 +48,7 @@ void BaseState::setupTitle(const std::string& title)
         AppConst::Colors::BLACK_A
     ));
 
-    centerText(m_titleText, sf::Vector2(AppConst::Window::DEFAULT_WIDTH / 2,
+    centerText(m_titleText, sf::Vector2f(AppConst::Window::DEFAULT_WIDTH / 2.0f,
         AppConst::UI::TITLE_Y_POSITION));
 }
 

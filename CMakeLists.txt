@@ -50,8 +50,19 @@ if(WIN32)
     )
     set_target_properties(${EXECUTABLE_NAME} PROPERTIES
         WIN32_EXECUTABLE ON
-        LINK_FLAGS "/SUBSYSTEM:WINDOWS"
     )
+
+    # Set correct linker flag for MinGW
+    if(MINGW)
+        target_link_libraries(${EXECUTABLE_NAME} PRIVATE -mwindows)
+    endif()
+
+    # Set correct linker flag for MSVC
+    if(MSVC)
+        set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+            LINK_FLAGS "/SUBSYSTEM:WINDOWS"
+        )
+    endif()
 endif()
 
 # macOS bundle configuration
