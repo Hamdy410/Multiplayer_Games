@@ -1,8 +1,13 @@
 #include <games/xo/xogame.hpp>
+#include <constants/applicationconstants.hpp>
+#include <constants/xogameconstants.hpp>
 #include <iostream>
 
+namespace AppConst = ApplicationConstants;
+namespace XOConst = XOGameConstants;
+
 XOGame::XOGame() : m_currentPlayer(CellState::X), m_gameOver(false),
-                   m_gameStatus("PLayer X's turn")
+                   m_gameStatus("Player X's Turn")
 {
     initialize();
 }
@@ -25,33 +30,42 @@ void XOGame::update(float deltaTime)
 
 void XOGame::draw(sf::RenderWindow& window)
 {
-  
-    // TODO: We will need to implement:
+    const float margin = XOConst::GRID_MARGIN;
+    const float outerX = AppConst::UI::GAME_AREA_X;
+    const float outerY = AppConst::UI::GAME_AREA_Y;
+    const float outerW = AppConst::UI::GAME_AREA_WIDTH;
+    const float outerH = AppConst::UI::GAME_AREA_HEIGHT;
 
-  
-    //      - Draw game board
-//----- // horizontal lines
-    sf::RectangleShape line1_h(sf::Vector2f(600.f, 5.f));
-    line1_h.setPosition(100.f, 250.f);
-    line1_h.setFillColor(sf::Color::White);
+    const float innerX = outerX + margin;
+    const float innerY = outerY + margin;
+    const float innerW = outerW - 2 * margin;
+    const float innerH = outerH - 2 * margin;
 
-    sf::RectangleShape line2_h(sf::Vector2f(600.f, 5.f));
-    line2_h.setPosition(100.f, 450.f);
-    line2_h.setFillColor(sf::Color::White);
+    const float gridThickness = 8.0f;
 
-    //vertical lines
-    sf::RectangleShape line1_v(sf::Vector2f(5.f, 600.f));
-    line1_v.setPosition(300.f, 50.f);
-    line1_v.setFillColor(sf::Color::White);
+    // Now calculate cell sizes inside the *inner* area
+    float cellW = innerW / 3.0f;
+    float cellH = innerH / 3.0f;
 
-    sf::RectangleShape line2_v(sf::Vector2f(5.f, 600.f));
-    line2_v.setPosition(500.f, 50.f);
-    line2_v.setFillColor(sf::Color::White);
-//------------//
+    // Vertical grid lines
+    for (int i = 1; i < 3; ++i) {
+        sf::RectangleShape vLine(sf::Vector2f(gridThickness, innerH));
+        vLine.setPosition(innerX + i * cellW - gridThickness/2, innerY);
+        vLine.setFillColor(sf::Color::White);
+        vLine.setOutlineColor(sf::Color::Black);
+        vLine.setOutlineThickness(3.f);
+        window.draw(vLine);
+    }
+    // Horizontal grid lines
+    for (int i = 1; i < 3; ++i) {
+        sf::RectangleShape hLine(sf::Vector2f(innerW, gridThickness));
+        hLine.setPosition(innerX, innerY + i * cellH - gridThickness/2);
+        hLine.setFillColor(sf::Color::White);
+        hLine.setOutlineColor(sf::Color::Black);
+        hLine.setOutlineThickness(3.f);
+        window.draw(hLine);
+    }
 
-  
-    //      - Draw X and O pieces
-    //      - Draw game specific UI
     std::cout << "XO Game drawing (TODO: implement)" << std::endl;
 }
 
