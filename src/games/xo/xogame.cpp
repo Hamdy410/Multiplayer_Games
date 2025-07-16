@@ -40,6 +40,7 @@ void XOGame::handleEvent(const sf::Event& event)
             if (row >= 0 && row < 3 && col >= 0 && col < 3 && m_board[row][col] == CellState::EMPTY) {
                 m_board[row][col] = m_currentPlayer;
                 m_currentPlayer = (m_currentPlayer == CellState::X) ? CellState::O : CellState::X;
+                m_gameStatus = (m_currentPlayer == CellState::X) ? "Player X's Turn" : "Player O's Turn";
             }
         }
     }
@@ -51,6 +52,11 @@ void XOGame::update(float deltaTime)
     // TODO: we will need to implement:
     //      - Game status updates
     //      - Animation updates
+    if (!m_gameOver) {
+        m_gameStatus = (m_currentPlayer == CellState::X)
+            ? "Player X's Turn"
+            : "Player O's Turn";
+    }
     std::cout << "XO Game updating (TODO: implement)" << std::endl;
 }
 
