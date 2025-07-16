@@ -26,8 +26,10 @@ class XOGame : public IGame
         *       - Win/lose detection
         */
 
+        sf::Font* m_font;
+
     public:
-        XOGame();
+        XOGame(sf::Font* font);
         virtual ~XOGame() = default;
 
         // IGame interface implementation

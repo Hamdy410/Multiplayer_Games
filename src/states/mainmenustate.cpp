@@ -114,7 +114,7 @@ void MainMenuState::setupGameCards() {
         std::cout << "Tic-Tac-Toe game selected!" << std::endl;
         
         // Create XO game object and pass to general GameState
-        auto xoGame = std::make_unique<XOGame>();
+        auto xoGame = std::make_unique<XOGame>(m_sharedFont);
         m_stateManager->pushState(
                 std::make_unique<GameState>(m_window, m_stateManager, 
                 m_sharedFont, std::move(xoGame)

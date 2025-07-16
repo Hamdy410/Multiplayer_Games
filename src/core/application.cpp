@@ -9,7 +9,9 @@ namespace AppConst = ApplicationConstants;
 Application::Application() :
     m_window(sf::VideoMode(AppConst::Window::DEFAULT_WIDTH, 
                           AppConst::Window::DEFAULT_HEIGHT), 
-             AppConst::Window::TITLE)
+             AppConst::Window::TITLE,
+             sf::Style::Titlebar | sf::Style::Close
+            )
 {
     m_window.setFramerateLimit(AppConst::Window::FRAMERATE_LIMIT);
     
