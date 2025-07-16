@@ -5,19 +5,33 @@
 #include <functional>
 #include <string>
 
+#if SFML_VERSION_MAJOR >= 3
+    #include <optional>
+#endif
+
 class GameCard
 {
     private:
         sf::RectangleShape m_background;
-        sf::Sprite m_icon;
-        sf::Text m_title;
-        sf::Text m_description;
         sf::Font* m_font;
         sf::Texture* m_texture;
         sf::Vector2f m_position;
         sf::Vector2f m_size;
         bool m_isHovered = false;
         std::function<void()> m_onClick;
+
+        // Version-specific member declarations
+#if SFML_VERSION_MAJOR >= 3
+        // SFML 3.0+ - Use optional for sprite, initialize text with font
+        std::optional<sf::Sprite> m_icon;
+        sf::Text m_title;
+        sf::Text m_description;
+#else
+        // SFML 2.x - Standard declarations with default constructors
+        sf::Sprite m_icon;
+        sf::Text m_title;
+        sf::Text m_description;
+#endif
 
         void updateVisuals();
     

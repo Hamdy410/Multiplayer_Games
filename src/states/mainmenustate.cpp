@@ -19,27 +19,59 @@ MainMenuState::MainMenuState(sf::RenderWindow* window, StateManager* stateManage
     setBackgroundPattern(PatternType::GRID_FADE, MenuConst::PATTERN_SPEEDS[0]);
 
     // Create the Scrollable Content Area
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ API - Vector2f constructor
+    sf::FloatRect contentBounds(
+        sf::Vector2f(AppConst::UI::GAME_AREA_X, AppConst::UI::GAME_AREA_Y),
+        sf::Vector2f(AppConst::UI::GAME_AREA_WIDTH, AppConst::UI::GAME_AREA_HEIGHT)
+    );
+#else
+    // SFML 2.x API - Four parameter constructor
     sf::FloatRect contentBounds(
         AppConst::UI::GAME_AREA_X, 
         AppConst::UI::GAME_AREA_Y,
         AppConst::UI::GAME_AREA_WIDTH,
         AppConst::UI::GAME_AREA_HEIGHT
     );
+#endif
+    
     m_ScrollableArea = std::make_unique<ScrollableContentArea> (m_window, contentBounds);
 
     setupInstructionText(MenuConst::INSTRUCTION_TEXT);
 
     // Position instruction text below the content area
     sf::FloatRect instrBounds = m_instructionText.getLocalBounds();
+    
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - use .size.x and Vector2f for setPosition
+    m_instructionText.setPosition(sf::Vector2f(
+        (AppConst::Window::DEFAULT_WIDTH - instrBounds.size.x) / 2,
+        MenuConst::INSTRUCTION_TEXT_POSITION_Y
+    ));
+#else
+    // SFML 2.x - use .width and separate parameters for setPosition
     m_instructionText.setPosition(
         (AppConst::Window::DEFAULT_WIDTH - instrBounds.width) / 2,
         MenuConst::INSTRUCTION_TEXT_POSITION_Y
     );
+#endif
 
     setupGameCards();
 }
 
 void MainMenuState::handleEvent(const sf::Event& event) {
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ API
+    if (event.is<sf::Event::KeyPressed>())
+    {
+        const auto& keyEvent = event.getIf<sf::Event::KeyPressed>();
+        if (keyEvent->code == sf::Keyboard::Key::Escape)
+            m_window->close();
+        if (keyEvent->code == sf::Keyboard::Key::Space)
+            cycleBackgroundPattern();
+    }
+#else
+    // SFML 2.x API
     if (event.type == sf::Event::KeyPressed)
     {
         if (event.key.code == sf::Keyboard::Escape)
@@ -47,6 +79,7 @@ void MainMenuState::handleEvent(const sf::Event& event) {
         if (event.key.code == sf::Keyboard::Space)
             cycleBackgroundPattern();
     }
+#endif
 
     m_ScrollableArea->handleEvent(event);
 }
@@ -92,13 +125,26 @@ void MainMenuState::cycleBackgroundPattern() {
 void MainMenuState::setupGameCards() {
     // Create only the Tic-Tac-Toe card
     auto texture = std::make_unique<sf::Texture>();
+    
+    // Note: sf::Texture uses loadFromFile() in both SFML 2.x and 3.0
+    // Only sf::Font changed to openFromFile() in SFML 3.0
     if (!texture->loadFromFile(MenuConst::XO_CARD_IMAGE_PATH)) {
         // Create placeholder if image doesn't exist
+#if SFML_VERSION_MAJOR >= 3
+        // SFML 3.0+ API - sf::Image constructor
+        sf::Image placeholder(sf::Vector2u(CardConst::PLACEHOLDER_SIZE, CardConst::PLACEHOLDER_SIZE), sf::Color::Blue);
+        if (!texture->loadFromImage(placeholder)) {
+            std::cout << "Error: Could not create placeholder texture" << std::endl;
+        }
+#else
+        // SFML 2.x API - sf::Image create() method
         sf::Image placeholder;
         placeholder.create(CardConst::PLACEHOLDER_SIZE, CardConst::PLACEHOLDER_SIZE, sf::Color::Blue);
         texture->loadFromImage(placeholder);
+#endif
         std::cout << "Warning: Could not load xo_card.png, using placeholder" << std::endl;
     }
+    
     m_cardTextures.push_back(std::move(texture));
 
     auto card = std::make_unique<GameCard>(

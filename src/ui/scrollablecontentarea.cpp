@@ -19,16 +19,33 @@ m_cardSpacing(ScrollConst::DEFAULT_CARD_SPACING),
 m_totalContentHeight(ScrollConst::INITIAL_TOTAL_CONTENT_HEIGHT)
 {
     // Setup clipping view
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - Use Vector2f parameters for setCenter and setSize
+    m_contentView.setCenter(sf::Vector2f(m_bounds.position.x + m_bounds.size.x / 2, 
+                                        m_bounds.position.y + m_bounds.size.y / 2));
+    m_contentView.setSize(sf::Vector2f(m_bounds.size.x, m_bounds.size.y));
+    
+    // SFML 3.0+ - FloatRect constructor with Vector2f
+    m_contentView.setViewport(sf::FloatRect(
+        sf::Vector2f(m_bounds.position.x / window->getSize().x, 
+                     m_bounds.position.y / window->getSize().y),
+        sf::Vector2f(m_bounds.size.x / window->getSize().x, 
+                     m_bounds.size.y / window->getSize().y)
+    ));
+#else
+    // SFML 2.x - Use reset method
     m_contentView.reset(m_bounds);
-    m_contentView.setViewport(
-        sf::FloatRect(
-            m_bounds.left / window->getSize().x,
-            m_bounds.top / window->getSize().y,
-            m_bounds.width / window->getSize().x,
-            m_bounds.height / window->getSize().y
-        )
-    );
+    
+    // SFML 2.x - FloatRect constructor with four parameters
+    m_contentView.setViewport(sf::FloatRect(
+        m_bounds.left / window->getSize().x,
+        m_bounds.top / window->getSize().y,
+        m_bounds.width / window->getSize().x,
+        m_bounds.height / window->getSize().y
+    ));
+#endif
 }
+
 
 void ScrollableContentArea::calculateGridLayout() {
     if (m_cards.empty()) {
@@ -37,7 +54,14 @@ void ScrollableContentArea::calculateGridLayout() {
     }
     
     // Calculate cards per row based on available width
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - Use .size.x
+    float availableWidth = m_bounds.size.x - (m_cardSpacing * ScrollConst::SPACING_MULTIPLIER);
+#else
+    // SFML 2.x - Use .width
     float availableWidth = m_bounds.width - (m_cardSpacing * ScrollConst::SPACING_MULTIPLIER);
+#endif
+    
     float cardWidth = MenuConst::CARD_WIDTH;
     m_cardsPerRow = static_cast<int>((availableWidth + m_cardSpacing) / (cardWidth + m_cardSpacing));
     m_cardsPerRow = std::max(ScrollConst::MIN_CARDS_PER_ROW, m_cardsPerRow);
@@ -52,7 +76,14 @@ void ScrollableContentArea::calculateGridLayout() {
 
 void ScrollableContentArea::updateScrollLimits()
 {
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - Use .size.y
+    m_maxScrollOffset = std::max(0.0f, m_totalContentHeight - m_bounds.size.y);
+#else
+    // SFML 2.x - Use .height
     m_maxScrollOffset = std::max(0.0f, m_totalContentHeight - m_bounds.height);
+#endif
+    
     m_scrollOffset = std::max(0.0f, std::min(m_scrollOffset, m_maxScrollOffset));
 }
 
@@ -62,8 +93,16 @@ void ScrollableContentArea::updateCardPositions() {
     m_cardPositions.resize(m_cards.size());
     
     float actualGridWidth = (m_cardsPerRow * MenuConst::CARD_WIDTH) + ((m_cardsPerRow - 1) * m_cardSpacing);
+    
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - Use .position.x/.position.y and .size.x
+    float startX = m_bounds.position.x + (m_bounds.size.x - actualGridWidth) / 2;
+    float startY = m_bounds.position.y + m_cardSpacing - m_scrollOffset;
+#else
+    // SFML 2.x - Use .left/.top and .width
     float startX = m_bounds.left + (m_bounds.width - actualGridWidth) / 2;
     float startY = m_bounds.top + m_cardSpacing - m_scrollOffset;
+#endif
     
     for (size_t i = 0; i < m_cards.size(); ++i) {
         int row = i / m_cardsPerRow;
@@ -101,8 +140,18 @@ void ScrollableContentArea::setCardSpacing(float spacing)
 void ScrollableContentArea::handleEvent(const sf::Event& event)
 {
     // Handle scrolling
-    if (event.type == sf::Event::MouseWheelScrolled && m_maxScrollOffset > 0)
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ API
+    if (event.is<sf::Event::MouseWheelScrolled>() && m_maxScrollOffset > 0) {
+        const auto& wheelEvent = event.getIf<sf::Event::MouseWheelScrolled>();
+        scrollBy(-wheelEvent->delta * m_scrollSpeed);
+    }
+#else
+    // SFML 2.x API
+    if (event.type == sf::Event::MouseWheelScrolled && m_maxScrollOffset > 0) {
         scrollBy(-event.mouseWheelScroll.delta * m_scrollSpeed);
+    }
+#endif
     
     // Forward events to visible cards only
     for (size_t i = 0; i < m_cards.size(); i++)
@@ -161,10 +210,19 @@ bool ScrollableContentArea::isCardVisible(size_t cardIndex) const
     float cardBottom = cardPos.y + MenuConst::CARD_HEIGHT;
 
     // Content Area bounds
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - Use .position.x/.position.y and .size.x/.size.y
+    float contentLeft = m_bounds.position.x;
+    float contentTop = m_bounds.position.y;
+    float contentRight = m_bounds.position.x + m_bounds.size.x;
+    float contentBottom = m_bounds.position.y + m_bounds.size.y;
+#else
+    // SFML 2.x - Use .left/.top/.width/.height
     float contentLeft = m_bounds.left;
     float contentTop = m_bounds.top;
     float contentRight = m_bounds.left + m_bounds.width;
     float contentBottom = m_bounds.top + m_bounds.height;
+#endif
 
     // Check the intersection using algorithm provided by perplexity
     bool horizontalOverlap = (cardLeft < contentRight) && (cardRight > contentLeft);

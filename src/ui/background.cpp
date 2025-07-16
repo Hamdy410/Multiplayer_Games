@@ -7,6 +7,17 @@ using namespace sf;
 // Namespace alias for cleaner code
 namespace BgConst = BackgroundConstants;
 
+// Type aliases for SFML version compatibility
+#if SFML_VERSION_MAJOR >= 3
+    using UInt8Type = std::uint8_t;
+    constexpr auto QuadsType = sf::PrimitiveType::Triangles;
+    constexpr int VERTICES_PER_QUAD = 6; // 2 triangles = 6 vertices
+#else
+    using UInt8Type = sf::Uint8;
+    constexpr auto QuadsType = sf::Quads;
+    constexpr int VERTICES_PER_QUAD = 4; // 1 quad = 4 vertices
+#endif
+
 BackgroundPattern::BackgroundPattern(RenderWindow* window, PatternType pattern) 
     : m_window(window), m_currentPattern(pattern), 
       m_pixelSize(BgConst::PixelSize::DEFAULT_SIZE), 
@@ -26,8 +37,8 @@ void BackgroundPattern::initializePattern()
     int rows = m_windowSize.y / m_pixelSize;
     int totalPixels = cols * rows;
     
-    m_vertices.setPrimitiveType(Quads);
-    m_vertices.resize(totalPixels * 4);
+    m_vertices.setPrimitiveType(QuadsType);
+    m_vertices.resize(totalPixels * VERTICES_PER_QUAD);
     
     // Initialize animation data
     m_pixelPhases.resize(totalPixels);
@@ -47,15 +58,30 @@ void BackgroundPattern::initializePattern()
     {
         for (int col = 0; col < cols; ++col)
         {
-            int index = (row * cols + col) * 4;
+            int pixelIndex = row * cols + col;
+            int vertexIndex = pixelIndex * VERTICES_PER_QUAD;
             
             float x = col * m_pixelSize;
             float y = row * m_pixelSize;
             
-            m_vertices[index].position = Vector2f(x, y);
-            m_vertices[index + 1].position = Vector2f(x + m_pixelSize, y);
-            m_vertices[index + 2].position = Vector2f(x + m_pixelSize, y + m_pixelSize);
-            m_vertices[index + 3].position = Vector2f(x, y + m_pixelSize);
+#if SFML_VERSION_MAJOR >= 3
+            // SFML 3.0+ - Convert quad to two triangles
+            // Triangle 1: top-left, top-right, bottom-left
+            m_vertices[vertexIndex].position = Vector2f(x, y);                              // top-left
+            m_vertices[vertexIndex + 1].position = Vector2f(x + m_pixelSize, y);           // top-right
+            m_vertices[vertexIndex + 2].position = Vector2f(x, y + m_pixelSize);           // bottom-left
+            
+            // Triangle 2: top-right, bottom-right, bottom-left
+            m_vertices[vertexIndex + 3].position = Vector2f(x + m_pixelSize, y);           // top-right
+            m_vertices[vertexIndex + 4].position = Vector2f(x + m_pixelSize, y + m_pixelSize); // bottom-right
+            m_vertices[vertexIndex + 5].position = Vector2f(x, y + m_pixelSize);           // bottom-left
+#else
+            // SFML 2.x - Use quad vertices
+            m_vertices[vertexIndex].position = Vector2f(x, y);
+            m_vertices[vertexIndex + 1].position = Vector2f(x + m_pixelSize, y);
+            m_vertices[vertexIndex + 2].position = Vector2f(x + m_pixelSize, y + m_pixelSize);
+            m_vertices[vertexIndex + 3].position = Vector2f(x, y + m_pixelSize);
+#endif
         }
     }
 }
@@ -71,21 +97,21 @@ void BackgroundPattern::updateGridFade()
         for (int col = 0; col < cols; ++col)
         {
             int pixelIndex = row * cols + col;
-            int vertexIndex = pixelIndex * 4;
+            int vertexIndex = pixelIndex * VERTICES_PER_QUAD;
             
             // Use constants with namespace alias
             float wave = std::sin(time + (col * BgConst::GridFade::WAVE_FREQUENCY_X) + (row * BgConst::GridFade::WAVE_FREQUENCY_Y));
             float opacity = (wave + 1.0f) * 0.5f * BgConst::GridFade::OPACITY_MULTIPLIER + BgConst::GridFade::OPACITY_BASE;
             
             Color baseColor = m_primaryColors[pixelIndex % m_primaryColors.size()];
-            Color color(baseColor.r, baseColor.g, baseColor.b, static_cast<Uint8>(opacity));
+            Color color(baseColor.r, baseColor.g, baseColor.b, static_cast<UInt8Type>(opacity));
             
             if (m_randomFloat(m_rng) < BgConst::GridFade::ACCENT_PROBABILITY) {
                 color = m_accentColors[pixelIndex % m_accentColors.size()];
-                color.a = static_cast<Uint8>(opacity * BgConst::GridFade::ACCENT_OPACITY_MULTIPLIER);
+                color.a = static_cast<UInt8Type>(opacity * BgConst::GridFade::ACCENT_OPACITY_MULTIPLIER);
             }
             
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < VERTICES_PER_QUAD; ++i)
                 m_vertices[vertexIndex + i].color = color;
         }
     }
@@ -102,7 +128,7 @@ void BackgroundPattern::updateFloatingPixels()
         for (int col = 0; col < cols; ++col)
         {
             int pixelIndex = row * cols + col;
-            int vertexIndex = pixelIndex * 4;
+            int vertexIndex = pixelIndex * VERTICES_PER_QUAD;
             
             // Use constants with namespace alias
             float floatX = std::sin(time * BgConst::FloatingPixels::FLOAT_FREQUENCY_X + m_pixelPhases[pixelIndex]) * BgConst::FloatingPixels::FLOAT_AMPLITUDE;
@@ -111,18 +137,32 @@ void BackgroundPattern::updateFloatingPixels()
             float baseX = col * m_pixelSize;
             float baseY = row * m_pixelSize;
             
+#if SFML_VERSION_MAJOR >= 3
+            // SFML 3.0+ - Update triangle positions
+            // Triangle 1: top-left, top-right, bottom-left
+            m_vertices[vertexIndex].position = Vector2f(baseX + floatX, baseY + floatY);
+            m_vertices[vertexIndex + 1].position = Vector2f(baseX + m_pixelSize + floatX, baseY + floatY);
+            m_vertices[vertexIndex + 2].position = Vector2f(baseX + floatX, baseY + m_pixelSize + floatY);
+            
+            // Triangle 2: top-right, bottom-right, bottom-left
+            m_vertices[vertexIndex + 3].position = Vector2f(baseX + m_pixelSize + floatX, baseY + floatY);
+            m_vertices[vertexIndex + 4].position = Vector2f(baseX + m_pixelSize + floatX, baseY + m_pixelSize + floatY);
+            m_vertices[vertexIndex + 5].position = Vector2f(baseX + floatX, baseY + m_pixelSize + floatY);
+#else
+            // SFML 2.x - Update quad positions
             m_vertices[vertexIndex].position = Vector2f(baseX + floatX, baseY + floatY);
             m_vertices[vertexIndex + 1].position = Vector2f(baseX + m_pixelSize + floatX, baseY + floatY);
             m_vertices[vertexIndex + 2].position = Vector2f(baseX + m_pixelSize + floatX, baseY + m_pixelSize + floatY);
             m_vertices[vertexIndex + 3].position = Vector2f(baseX + floatX, baseY + m_pixelSize + floatY);
+#endif
             
             float pulse = (std::sin(time * BgConst::FloatingPixels::PULSE_FREQUENCY + m_pixelPhases[pixelIndex]) + 1.0f) * 0.5f;
             float opacity = pulse * BgConst::FloatingPixels::OPACITY_MULTIPLIER + BgConst::FloatingPixels::OPACITY_BASE;
             
             Color color = m_primaryColors[pixelIndex % m_primaryColors.size()];
-            color.a = static_cast<Uint8>(opacity);
+            color.a = static_cast<UInt8Type>(opacity);
             
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < VERTICES_PER_QUAD; ++i)
                 m_vertices[vertexIndex + i].color = color;
         }
     }
@@ -137,7 +177,7 @@ void BackgroundPattern::updateWavePattern()
     for (int row = 0; row < rows; ++row) {
         for (int col = 0; col < cols; ++col) {
             int pixelIndex = row * cols + col;
-            int vertexIndex = pixelIndex * 4;
+            int vertexIndex = pixelIndex * VERTICES_PER_QUAD;
             
             // Create ripple effect from center using constants
             float centerX = m_windowSize.x * 0.5f;
@@ -152,9 +192,9 @@ void BackgroundPattern::updateWavePattern()
             float opacity = (wave + 1.0f) * 0.5f * BgConst::WavePattern::OPACITY_MULTIPLIER + BgConst::WavePattern::OPACITY_BASE;
             
             Color color = (wave > 0) ? m_accentColors[0] : m_primaryColors[0];
-            color.a = static_cast<Uint8>(opacity);
+            color.a = static_cast<UInt8Type>(opacity);
             
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < VERTICES_PER_QUAD; ++i)
                 m_vertices[vertexIndex + i].color = color;
         }
     }
@@ -171,7 +211,7 @@ void BackgroundPattern::updateMatrixRain()
         for (int col = 0; col < cols; ++col)
         {
             int pixelIndex = row * cols + col;
-            int vertexIndex = pixelIndex * 4;
+            int vertexIndex = pixelIndex * VERTICES_PER_QUAD;
             
             // Use constants with namespace alias for Matrix Rain effect
             float fallSpeed = BgConst::MatrixRain::BASE_FALL_SPEED + (m_pixelPhases[pixelIndex] * BgConst::MatrixRain::SPEED_VARIATION);
@@ -194,20 +234,20 @@ void BackgroundPattern::updateMatrixRain()
             
             Color color;
             if (intensity > BgConst::MatrixRain::BRIGHT_THRESHOLD)
-                color = Color(BgConst::Colors::MatrixRain::BRIGHT_R, BgConst::Colors::MatrixRain::BRIGHT_G, BgConst::Colors::MatrixRain::BRIGHT_B, static_cast<Uint8>(opacity));
+                color = Color(BgConst::Colors::MatrixRain::BRIGHT_R, BgConst::Colors::MatrixRain::BRIGHT_G, BgConst::Colors::MatrixRain::BRIGHT_B, static_cast<UInt8Type>(opacity));
             else if (intensity > BgConst::MatrixRain::MEDIUM_THRESHOLD)
-                color = Color(BgConst::Colors::MatrixRain::MEDIUM_R, BgConst::Colors::MatrixRain::MEDIUM_G, BgConst::Colors::MatrixRain::MEDIUM_B, static_cast<Uint8>(opacity));
+                color = Color(BgConst::Colors::MatrixRain::MEDIUM_R, BgConst::Colors::MatrixRain::MEDIUM_G, BgConst::Colors::MatrixRain::MEDIUM_B, static_cast<UInt8Type>(opacity));
             else if (intensity > BgConst::MatrixRain::FADE_THRESHOLD)
-                color = Color(BgConst::Colors::MatrixRain::DARK_R, BgConst::Colors::MatrixRain::DARK_G, BgConst::Colors::MatrixRain::DARK_B, static_cast<Uint8>(opacity));
+                color = Color(BgConst::Colors::MatrixRain::DARK_R, BgConst::Colors::MatrixRain::DARK_G, BgConst::Colors::MatrixRain::DARK_B, static_cast<UInt8Type>(opacity));
             else {
                 Color baseColor = m_primaryColors[pixelIndex % m_primaryColors.size()];
                 color = Color(baseColor.r, baseColor.g, baseColor.b, BgConst::MatrixRain::BACKGROUND_OPACITY);
             }
             
             if (m_randomFloat(m_rng) < BgConst::MatrixRain::ACCENT_PROBABILITY && intensity > 0.5f)
-                color = Color(BgConst::Colors::MatrixRain::ACCENT_R, BgConst::Colors::MatrixRain::ACCENT_G, BgConst::Colors::MatrixRain::ACCENT_B, static_cast<Uint8>(opacity));
+                color = Color(BgConst::Colors::MatrixRain::ACCENT_R, BgConst::Colors::MatrixRain::ACCENT_G, BgConst::Colors::MatrixRain::ACCENT_B, static_cast<UInt8Type>(opacity));
             
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < VERTICES_PER_QUAD; ++i)
                 m_vertices[vertexIndex + i].color = color;
         }
     }

@@ -6,11 +6,16 @@ namespace AppConst = ApplicationConstants;
 namespace BgConst = BackgroundConstants;
 
 BaseState::BaseState(sf::RenderWindow* window, StateManager* stateManager,
-        sf::Font* font)
-        : m_window(window), m_stateManager(stateManager), m_sharedFont(font)
+    sf::Font* font)
+    : m_window(window), m_stateManager(stateManager), m_sharedFont(font)
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - sf::Text requires font in constructor
+    , m_titleText(*font, "", AppConst::UI::TITLE_FONT_SIZE)
+    , m_instructionText(*font, "", AppConst::UI::INSTRUCTION_FONT_SIZE)
+#endif
 {
-    setupBackground();
-    setupUI();
+setupBackground();
+setupUI();
 }
 
 void BaseState::setupBackground()
@@ -30,9 +35,17 @@ void BaseState::setupUI()
 
 void BaseState::setupTitle(const std::string& title)
 {
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - Text already initialized with font in constructor
+    m_titleText.setString(title);
+    m_titleText.setCharacterSize(AppConst::UI::TITLE_FONT_SIZE);
+#else
+    // SFML 2.x - Set font and other properties
     m_titleText.setFont(*m_sharedFont);
     m_titleText.setString(title);
     m_titleText.setCharacterSize(AppConst::UI::TITLE_FONT_SIZE);
+#endif
+    
     m_titleText.setFillColor(sf::Color(
         AppConst::Colors::WHITE_R,
         AppConst::Colors::WHITE_G,
@@ -77,9 +90,17 @@ void BaseState::setupContentArea(const sf::Vector2f& position, const sf::Vector2
 
 void BaseState::setupInstructionText(const std::string& text)
 {
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - Text already initialized with font in constructor
+    m_instructionText.setString(text);
+    m_instructionText.setCharacterSize(AppConst::UI::INSTRUCTION_FONT_SIZE);
+#else
+    // SFML 2.x - Set font and other properties
     m_instructionText.setFont(*m_sharedFont);
     m_instructionText.setString(text);
     m_instructionText.setCharacterSize(AppConst::UI::INSTRUCTION_FONT_SIZE);
+#endif
+    
     m_instructionText.setFillColor(
         sf::Color(
             AppConst::Colors::INSTRUCTION_TEXT_R,
@@ -115,8 +136,16 @@ void BaseState::drawBackground()
 void BaseState::centerText(sf::Text& text, const sf::Vector2f& center)
 {
     sf::FloatRect bounds = text.getLocalBounds();
+    
+#if SFML_VERSION_MAJOR >= 3
+    // SFML 3.0+ - use .size.x/.size.y and Vector2f for setPosition
+    text.setPosition(sf::Vector2f(center.x - bounds.size.x / 2, center.y - bounds.size.y / 2));
+#else
+    // SFML 2.x - use .width/.height and separate float parameters for setPosition
     text.setPosition(center.x - bounds.width / 2, center.y - bounds.height / 2);
+#endif
 }
+
 
 void BaseState::setBackgroundPattern(PatternType pattern, float speed)
 {
