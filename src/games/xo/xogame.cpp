@@ -47,6 +47,60 @@ void XOGame::handleEvent(const sf::Event& event)
     std::cout << "XO Game handling event (TODO: implement)" << std::endl;
 }
 
+char checkWin()
+{
+  
+}
+
+void displayWinner(sf::RenderWindow& window, sf::Font& font, char winner)
+{
+    float boxWidth = window.getSize().x * 0.6f;
+    float boxHeight = window.getSize().y * 0.3f;
+
+    sf::RectangleShape resultBox;
+    resultBox.setSize(sf::Vector2f(boxWidth, boxHeight));
+    resultBox.setFillColor(sf::Color(0, 0, 0, 200)); 
+    resultBox.setPosition(
+        (window.getSize().x - boxWidth) / 2,
+        (window.getSize().y - boxHeight) / 2
+    );
+
+   
+    sf::Text resultText;
+    resultText.setFont(font);
+    resultText.setCharacterSize(36);
+    resultText.setFillColor(sf::Color::White);
+
+    if (winner == 'X')
+        resultText.setString("Player X Wins!");
+    else if (winner == 'O')
+        resultText.setString("Player O Wins!");
+    else
+        resultText.setString("It's a Draw!");
+
+    resultText.setPosition(
+        window.getSize().x / 2 - resultText.getGlobalBounds().width / 2,
+        resultBox.getPosition().y + 0.1*boxHeight
+    );
+
+
+    sf::Text playAgainText;
+    playAgainText.setFont(font);
+    playAgainText.setCharacterSize(24);
+    playAgainText.setFillColor(sf::Color::White);
+    playAgainText.setString("Press Enter to play again");
+
+    playAgainText.setPosition(
+        window.getSize().x / 2 - playAgainText.getGlobalBounds().width / 2,
+        resultText.getPosition().y + 0.5*boxHeight
+    );
+
+
+    window.draw(resultBox);
+    window.draw(resultText);
+    window.draw(playAgainText);
+}
+
 void XOGame::update(float deltaTime)
 {
     // TODO: we will need to implement:
@@ -58,6 +112,13 @@ void XOGame::update(float deltaTime)
             : "Player O's Turn";
     }
     std::cout << "XO Game updating (TODO: implement)" << std::endl;
+
+  char winner = checkWin();
+    if (winner != ' ' && !gameOver)
+    {
+        gameOver = true;
+        displayWinner(*window, font, winner);
+    }
 }
 
 void XOGame::draw(sf::RenderWindow& window)
