@@ -19,8 +19,9 @@ class GameState : public BaseState
         GameState(sf::RenderWindow* window, StateManager* stateManager,
             sf::Font* font, std::unique_ptr<IGame> gameObject);
         
-        void handleEvent(const sf::Event& event) override;
-        void update(float deltaTime) override;
+        void handleEvent(const sf::Event& event) override; 
+        void update(float deltaTime, sf::RenderWindow& window) override;
+
         void draw() override;
         void onEnter() override;
         void onExit() override;
