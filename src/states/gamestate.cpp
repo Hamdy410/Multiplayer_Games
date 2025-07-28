@@ -62,9 +62,9 @@ void GameState::handleEvent(const sf::Event& event)
     m_gameObject->handleEvent(event);
 }
 
-void GameState::update(float deltaTime)
+void GameState::update(float deltaTime, sf::RenderWindow& window)
 {
-    m_gameObject->update(deltaTime);
+    m_gameObject->update(deltaTime, window);
     updateGameStatus();
 }
 
@@ -102,3 +102,4 @@ void GameState::onExit()
 {
     m_gameObject->cleanup();
 }
+
