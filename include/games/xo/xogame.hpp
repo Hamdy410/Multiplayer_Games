@@ -34,8 +34,12 @@ class XOGame : public IGame
 
         // IGame interface implementation
         void handleEvent(const sf::Event& event) override;
-        void update(float deltaTime) override;
+        void update(float deltaTime, sf::RenderWindow& window) override;
+
         void draw(sf::RenderWindow& window) override;
+
+        char checkWin();
+        void displayWinner(sf::RenderWindow& window, sf::Font& font, char winner);
 
         void initialize() override;
         void reset() override;
@@ -47,3 +51,4 @@ class XOGame : public IGame
 };
 
 #endif  // XOGAME_HPP
+
