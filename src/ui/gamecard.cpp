@@ -188,4 +188,3 @@ void GameCard::updateVisuals()
         m_background.setOutlineThickness(CardConst::NORMAL_OUTLINE_THICKNESS);
     }
 }
-
