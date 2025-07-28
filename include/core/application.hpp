@@ -18,6 +18,7 @@ public:
     Application();
     void run();
     void processEvents();
-    void update(float deltaTime);
+    void update(float deltaTime, sf::RenderWindow& window);
     void render();
 };
+
