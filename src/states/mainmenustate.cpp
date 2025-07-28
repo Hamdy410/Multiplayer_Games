@@ -51,8 +51,8 @@ void MainMenuState::handleEvent(const sf::Event& event) {
     m_ScrollableArea->handleEvent(event);
 }
 
-void MainMenuState::update(float deltaTime) {
-    m_ScrollableArea->update(deltaTime);
+void MainMenuState::update(float deltaTime, sf::RenderWindow& window) {
+    m_ScrollableArea->update(deltaTime,window);
 }
 
 void MainMenuState::draw() {
@@ -126,3 +126,4 @@ void MainMenuState::setupGameCards() {
     
     std::cout << "Created single Tic-Tac-Toe game card" << std::endl;
 }
+
