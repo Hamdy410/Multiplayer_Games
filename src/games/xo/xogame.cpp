@@ -47,12 +47,12 @@ void XOGame::handleEvent(const sf::Event& event)
     std::cout << "XO Game handling event (TODO: implement)" << std::endl;
 }
 
-char checkWin()
+char XOGame::checkWin()
 {
-  
+    return 0;
 }
 
-void displayWinner(sf::RenderWindow& window, sf::Font& font, char winner)
+void XOGame::displayWinner(sf::RenderWindow& window, sf::Font& font, char winner)
 {
     float boxWidth = window.getSize().x * 0.6f;
     float boxHeight = window.getSize().y * 0.3f;
@@ -101,7 +101,7 @@ void displayWinner(sf::RenderWindow& window, sf::Font& font, char winner)
     window.draw(playAgainText);
 }
 
-void XOGame::update(float deltaTime)
+void XOGame::update(float deltaTime, sf::RenderWindow& window)
 {
     // TODO: we will need to implement:
     //      - Game status updates
@@ -114,10 +114,10 @@ void XOGame::update(float deltaTime)
     std::cout << "XO Game updating (TODO: implement)" << std::endl;
 
   char winner = checkWin();
-    if (winner != ' ' && !gameOver)
+    if (winner != ' ' && !m_gameOver)
     {
-        gameOver = true;
-        displayWinner(*window, font, winner);
+        m_gameOver = true;
+        displayWinner(window, *m_font, winner);
     }
 }
 
@@ -207,3 +207,4 @@ void XOGame::cleanup()
     // TODO: We will need to implement cleaning up if required
     std::cout << "XO Game cleanup" << std::endl;
 }
+
