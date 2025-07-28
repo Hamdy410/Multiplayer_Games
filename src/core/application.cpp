@@ -40,7 +40,7 @@ void Application::run() {
         float deltaTime = m_deltaClock.restart().asSeconds();
         
         processEvents();
-        update(deltaTime);
+        update(deltaTime, m_window);
         render();
     }
 }
@@ -57,9 +57,9 @@ void Application::processEvents() {
     }
 }
 
-void Application::update(float deltaTime) {
+void Application::update(float deltaTime, sf::RenderWindow& window) {
     // Delegate updates to the state manager
-    m_stateManager->update(deltaTime);
+    m_stateManager->update(deltaTime,window);
 }
 
 void Application::render() {
