@@ -8,9 +8,11 @@ class IGame
     public:
         virtual ~IGame() = default;
 
+
+
         // Core game interface methods
         virtual void handleEvent(const sf::Event& event) = 0;
-        virtual void update(float deltaTime) = 0;
+        virtual void update(float deltaTime, sf::RenderWindow& window) = 0;
         virtual void draw(sf::RenderWindow& window) = 0;
 
         // Game lifecycle methods
@@ -22,6 +24,10 @@ class IGame
         virtual std::string getGameName() const = 0;
         virtual bool isGameOver() const = 0;
         virtual std::string getGameStatus() const = 0;
+
+
+
+
 };
 
 #endif  // IGAME_HPP
