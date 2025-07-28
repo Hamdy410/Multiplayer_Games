@@ -21,7 +21,7 @@ class StateManager
         void changeState(std::unique_ptr<BaseState> state);
 
         void handleEvent(const sf::Event& event);
-        void update(float deltaTime);
+        void update(float deltaTime, sf::RenderWindow& window);
         void draw();
 
         bool isEmpty() const { return m_states.empty(); }
