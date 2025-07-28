@@ -45,10 +45,10 @@ void StateManager::handleEvent(const sf::Event& event)
         m_states.top()->handleEvent(event);
 }
 
-void StateManager::update(float deltaTime)
+void StateManager::update(float deltaTime, sf::RenderWindow& window)
 {
     if (!m_states.empty())
-        m_states.top()->update(deltaTime);
+        m_states.top()->update(deltaTime,window);
 }
 
 void StateManager::draw()
@@ -56,3 +56,4 @@ void StateManager::draw()
     if (!m_states.empty())
         m_states.top()->draw();
 }
+
