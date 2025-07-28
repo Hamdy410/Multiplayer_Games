@@ -22,7 +22,7 @@ class MainMenuState : public BaseState
             sf::Font* font);
         
         void handleEvent(const sf::Event& event) override;
-        void update(float deltaTime) override;
+        void update(float deltaTime, sf::RenderWindow& window) override;
         void draw() override;
         void onEnter() override;
 };
