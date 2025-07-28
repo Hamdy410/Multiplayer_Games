@@ -35,7 +35,7 @@ class BaseState
 
             // Pure virtual methods that each state must implement
             virtual void handleEvent(const sf::Event& event) = 0;
-            virtual void update(float deltaTime) = 0;
+            virtual void update(float deltaTime, sf::RenderWindow& window) = 0;
             virtual void draw() = 0;
 
             // Optional virtual methods with default implementations
