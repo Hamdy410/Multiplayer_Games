@@ -45,7 +45,7 @@ class ScrollableContentArea
 
         // Event handling
         void handleEvent(const sf::Event& event);
-        void update(float deltaTime);
+        void update(float deltaTime, sf::RenderWindow& window);
         void draw();
 
         // Scrolling control
@@ -60,3 +60,4 @@ class ScrollableContentArea
 };
 
 #endif  // SCROLLABLECONTENTAREA_HPP
+
