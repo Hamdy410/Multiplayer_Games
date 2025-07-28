@@ -110,12 +110,12 @@ void ScrollableContentArea::handleEvent(const sf::Event& event)
             m_cards[i]->handleEvent(event, *m_window);
 }
 
-void ScrollableContentArea::update(float deltaTime)
+void ScrollableContentArea::update(float deltaTime, sf::RenderWindow& window)
 {
     // Update only visible cards for performance
     for (size_t i = 0; i < m_cards.size(); ++i)
         if (isCardVisible(i))
-            m_cards[i]->update(deltaTime);
+            m_cards[i]->update(deltaTime, window);
 }
 
 void ScrollableContentArea::draw() {
