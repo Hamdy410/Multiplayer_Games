@@ -32,7 +32,7 @@ class GameCard
         void setPosition(const sf::Vector2f& position);
 
         void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
-        void update(float dt);
+        void update(float dt, sf::RenderWindow& window);
         void draw(sf::RenderWindow& window);
 
         bool contains(const sf::Vector2f& point) const;
