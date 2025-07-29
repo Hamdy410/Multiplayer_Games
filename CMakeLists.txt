@@ -14,6 +14,22 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Version-specific component names
 # SFML 3.0+ uses capitalized names, 2.x uses lowercase
 function(find_sfml_with_version_detection)
+    # If SFML_DIR is explicitly set, prioritize it and clear cache
+    if(DEFINED SFML_DIR)
+        message(STATUS "SFML_DIR explicitly set to: ${SFML_DIR}")
+        
+        # Clear any cached SFML variables to force re-detection
+        unset(SFML_FOUND CACHE)
+        unset(SFML_VERSION CACHE)
+        unset(SFML_VERSION_MAJOR CACHE)
+        unset(SFML_VERSION_MINOR CACHE)
+        unset(SFML_VERSION_PATCH CACHE)
+        
+        # Set search paths to prefer explicit path
+        set(CMAKE_PREFIX_PATH ${SFML_DIR}/../.. ${CMAKE_PREFIX_PATH})
+        set(CMAKE_FIND_ROOT_PATH ${SFML_DIR}/../.. ${CMAKE_FIND_ROOT_PATH})
+    endif()
+    
     # Try SFML 3.x first with capitalized component names
     find_package(SFML 3 COMPONENTS System Window Graphics QUIET)
     if(SFML_FOUND)
