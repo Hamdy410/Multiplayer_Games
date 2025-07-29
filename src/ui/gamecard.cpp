@@ -143,7 +143,7 @@ void GameCard::handleEvent(const sf::Event& event, const sf::RenderWindow& windo
     }
 }
 
-void GameCard::update(float)
+void GameCard::update(float dt, sf::RenderWindow& window)
 {
     updateVisuals();
 }
