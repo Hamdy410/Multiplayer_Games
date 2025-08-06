@@ -49,7 +49,40 @@ void XOGame::handleEvent(const sf::Event& event)
 
 char XOGame::checkWin()
 {
-    return 0;
+    // 3 cases of Rows
+    if (m_board[0][0] != CellState::EMPTY && m_board[0][0] == m_board[0][1] && m_board[0][1] == m_board[0][2])
+        return (m_board[0][0] == CellState::X) ? 'X' : 'O';
+    if (m_board[1][0] != CellState::EMPTY && m_board[1][0] == m_board[1][1] && m_board[1][1] == m_board[1][2])
+        return (m_board[1][0] == CellState::X) ? 'X' : 'O';
+    if (m_board[2][0] != CellState::EMPTY && m_board[2][0] == m_board[2][1] && m_board[2][1] == m_board[2][2])
+        return (m_board[2][0] == CellState::X) ? 'X' : 'O';
+
+    // 3 cases of Columns
+    if (m_board[0][0] != CellState::EMPTY && m_board[0][0] == m_board[1][0] && m_board[1][0] == m_board[2][0])
+        return (m_board[0][0] == CellState::X) ? 'X' : 'O';
+    if (m_board[0][1] != CellState::EMPTY && m_board[0][1] == m_board[1][1] && m_board[1][1] == m_board[2][1])
+        return (m_board[0][1] == CellState::X) ? 'X' : 'O';
+    if (m_board[0][2] != CellState::EMPTY && m_board[0][2] == m_board[1][2] && m_board[1][2] == m_board[2][2])
+        return (m_board[0][2] == CellState::X) ? 'X' : 'O';
+
+    // 2 Diameter
+    if (m_board[0][0] != CellState::EMPTY && m_board[0][0] == m_board[1][1] && m_board[1][1] == m_board[2][2])
+        return (m_board[0][0] == CellState::X) ? 'X' : 'O';
+
+    if (m_board[0][2] != CellState::EMPTY && m_board[0][2] == m_board[1][1] && m_board[1][1] == m_board[2][0])
+        return (m_board[0][2] == CellState::X) ? 'X' : 'O';
+
+    // no winner
+    bool boardFull = true;
+    for (int row = 0; row < 3; row++)
+        for (int col = 0; col < 3; col++)
+            if (m_board[row][col] == CellState::EMPTY)
+                boardFull = false;
+
+    if (boardFull)
+        return 'D'; // Draw
+
+    return ' '; // Game is still ongoing
 }
 
 void XOGame::displayWinner(sf::RenderWindow& window, sf::Font& font, char winner)
