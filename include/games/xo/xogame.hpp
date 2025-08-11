@@ -2,7 +2,9 @@
 #define XOGAME_HPP
 
 #include <games/igame.hpp>
+#include <SFML/Graphics.hpp>
 #include <array>
+#include <string>
 
 enum class CellState
 {
@@ -13,52 +15,44 @@ enum class CellState
 
 class XOGame : public IGame
 {
-    private:
-        std::array<std::array<CellState, 3>, 3> m_board;
-        CellState m_currentPlayer;
-        bool m_gameOver;
-        std::string m_gameStatus;
+private:
+    std::array<std::array<CellState, 3>, 3> m_board{};
+    CellState m_currentPlayer;
+    bool m_gameOver;
+    std::string m_gameStatus;
 
-        sf::Vector2f m_winStart;
-        sf::Vector2f m_winEnd;
-        
-       
-        /*
-        *   TODO: We will need to implement these:
-        *       - UI elements for the game board
-        *       - Game Logic methods
-        *       - Win/lose detection
-        */
+    // Store the start/end points for the winner line
+    sf::Vector2f m_winStart{};
+    sf::Vector2f m_winEnd{};
 
-        sf::Font* m_font;
+    // Winner character: 'X', 'O', 'D' (draw), or ' ' (none yet)
+    char m_winner{' '};
 
-    public:
-        XOGame(sf::Font* font);
-        virtual ~XOGame() = default;
+    sf::Font* m_font;
 
-        // IGame interface implementation
-        void handleEvent(const sf::Event& event) override;
-        void update(float deltaTime, sf::RenderWindow& window) override;
+public:
+    XOGame(sf::Font* font);
+    virtual ~XOGame() = default;
 
-        void draw(sf::RenderWindow& window) override;
+    // IGame interface
+    void handleEvent(const sf::Event& event) override;
+    void update(float deltaTime, sf::RenderWindow& window) override;
+    void draw(sf::RenderWindow& window) override;
 
-        char checkWin();
-        void displayWinner(sf::RenderWindow& window, sf::Font& font, char winner);
+    // Game logic helpers
+    char checkWin(); // returns 'X', 'O', 'D', or ' '
+    void displayWinner(sf::RenderWindow& window, sf::Font& font, char winner);
 
-        void initialize() override;
-        void reset() override;
-        void cleanup() override;
+    void initialize() override;
+    void reset() override;
+    void cleanup() override;
 
-        std::string getGameName() const override { return "Tic-Tac-Toe"; }
-        bool isGameOver() const override { return m_gameOver; }
-        std::string getGameStatus() const override { return m_gameStatus; }
+    std::string getGameName() const override { return "Tic-Tac-Toe"; }
+    bool isGameOver() const override { return m_gameOver; }
+    std::string getGameStatus() const override { return m_gameStatus; }
 
-        sf::Vector2f getCellCenter(int row, int col);
-
-
-
-
+    // Utility to compute cell center
+    sf::Vector2f getCellCenter(int row, int col);
 };
 
-#endif  // XOGAME_HPP
-
+#endif // XOGAME_HPP
