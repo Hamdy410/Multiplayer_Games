@@ -19,6 +19,10 @@ class XOGame : public IGame
         bool m_gameOver;
         std::string m_gameStatus;
 
+        sf::Vector2f m_winStart;
+        sf::Vector2f m_winEnd;
+        
+       
         /*
         *   TODO: We will need to implement these:
         *       - UI elements for the game board
@@ -48,6 +52,12 @@ class XOGame : public IGame
         std::string getGameName() const override { return "Tic-Tac-Toe"; }
         bool isGameOver() const override { return m_gameOver; }
         std::string getGameStatus() const override { return m_gameStatus; }
+
+        sf::Vector2f getCellCenter(int row, int col);
+
+
+
+
 };
 
 #endif  // XOGAME_HPP
