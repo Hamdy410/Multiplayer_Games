@@ -50,40 +50,65 @@ void XOGame::handleEvent(const sf::Event& event)
 char XOGame::checkWin()
 {
     // 3 cases of Rows
-    if (m_board[0][0] != CellState::EMPTY && m_board[0][0] == m_board[0][1] && m_board[0][1] == m_board[0][2])
-        return (m_board[0][0] == CellState::X) ? 'X' : 'O';
-    if (m_board[1][0] != CellState::EMPTY && m_board[1][0] == m_board[1][1] && m_board[1][1] == m_board[1][2])
-        return (m_board[1][0] == CellState::X) ? 'X' : 'O';
-    if (m_board[2][0] != CellState::EMPTY && m_board[2][0] == m_board[2][1] && m_board[2][1] == m_board[2][2])
+    for (int row = 0; row < 3; row++) {
+        if (m_board[row][0] != CellState::EMPTY &&
+            m_board[row][0] == m_board[row][1] &&
+            m_board[row][1] == m_board[row][2])
+        {
+            m_winStart = getCellCenter(row, 0);
+            m_winEnd = getCellCenter(row, 2);
+            return (m_board[row][0] == CellState::X) ? 'X' : 'O';
+        }
+    }
         return (m_board[2][0] == CellState::X) ? 'X' : 'O';
 
     // 3 cases of Columns
-    if (m_board[0][0] != CellState::EMPTY && m_board[0][0] == m_board[1][0] && m_board[1][0] == m_board[2][0])
-        return (m_board[0][0] == CellState::X) ? 'X' : 'O';
-    if (m_board[0][1] != CellState::EMPTY && m_board[0][1] == m_board[1][1] && m_board[1][1] == m_board[2][1])
-        return (m_board[0][1] == CellState::X) ? 'X' : 'O';
-    if (m_board[0][2] != CellState::EMPTY && m_board[0][2] == m_board[1][2] && m_board[1][2] == m_board[2][2])
-        return (m_board[0][2] == CellState::X) ? 'X' : 'O';
-
+        for (int col = 0; col < 3; col++) {
+            if (m_board[0][col] != CellState::EMPTY &&
+                m_board[0][col] == m_board[1][col] &&
+                m_board[1][col] == m_board[2][col])
+            {
+                m_winStart = getCellCenter(0, col);
+                m_winEnd = getCellCenter(2, col);
+                return (m_board[0][col] == CellState::X) ? 'X' : 'O';
+            }
+        }
     // 2 Diameter
-    if (m_board[0][0] != CellState::EMPTY && m_board[0][0] == m_board[1][1] && m_board[1][1] == m_board[2][2])
-        return (m_board[0][0] == CellState::X) ? 'X' : 'O';
+        if (m_board[0][0] != CellState::EMPTY &&
+            m_board[0][0] == m_board[1][1] &&
+            m_board[1][1] == m_board[2][2])
+        {
+            m_winStart = getCellCenter(0, 0);
+            m_winEnd = getCellCenter(2, 2);
+            return (m_board[0][0] == CellState::X) ? 'X' : 'O';
+        }
 
-    if (m_board[0][2] != CellState::EMPTY && m_board[0][2] == m_board[1][1] && m_board[1][1] == m_board[2][0])
-        return (m_board[0][2] == CellState::X) ? 'X' : 'O';
+        
+        if (m_board[0][2] != CellState::EMPTY &&
+            m_board[0][2] == m_board[1][1] &&
+            m_board[1][1] == m_board[2][0])
+        {
+            m_winStart = getCellCenter(0, 2);
+            m_winEnd = getCellCenter(2, 0);
+            return (m_board[0][2] == CellState::X) ? 'X' : 'O';
+        }
+
 
     // no winner
-    bool boardFull = true;
-    for (int row = 0; row < 3; row++)
-        for (int col = 0; col < 3; col++)
-            if (m_board[row][col] == CellState::EMPTY)
-                boardFull = false;
+        bool boardFull = true;
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                if (m_board[row][col] == CellState::EMPTY)
+                    boardFull = false;
+            }
+        }
 
-    if (boardFull)
-        return 'D'; // Draw
+        if (boardFull)
+            return 'D'; // Draw
 
-    return ' '; // Game is still ongoing
+        return ' '; // Game is still ongoing
 }
+
 
 void XOGame::displayWinner(sf::RenderWindow& window, sf::Font& font, char winner)
 {
@@ -154,6 +179,22 @@ void XOGame::update(float deltaTime, sf::RenderWindow& window)
     }
 }
 
+sf::Vector2f XOGame::getCellCenter(int row, int col) {
+    float margin = XOConst::GRID_MARGIN;
+    float innerX = ApplicationConstants::UI::GAME_AREA_X + margin;
+    float innerY = ApplicationConstants::UI::GAME_AREA_Y + margin;
+    float innerW = ApplicationConstants::UI::GAME_AREA_WIDTH - 2 * margin;
+    float innerH = ApplicationConstants::UI::GAME_AREA_HEIGHT - 2 * margin;
+    float cellW = innerW / 3.0f;
+    float cellH = innerH / 3.0f;
+
+    return sf::Vector2f(
+        innerX + col * cellW + cellW / 2,
+        innerY + row * cellH + cellH / 2
+    );
+}
+
+
 void XOGame::draw(sf::RenderWindow& window)
 {
     const float margin = XOConst::GRID_MARGIN;
@@ -212,6 +253,15 @@ void XOGame::draw(sf::RenderWindow& window)
         }
     }
 
+    if (m_gameOver) {
+        sf::Vertex line[] = {
+            sf::Vertex(m_winStart, sf::Color::White),
+            sf::Vertex(m_winEnd, sf::Color::White)
+        };
+        window.draw(line, 2, sf::Lines);
+    }
+
+
     std::cout << "XO Game drawing (TODO: implement)" << std::endl;
 }
 
@@ -240,4 +290,3 @@ void XOGame::cleanup()
     // TODO: We will need to implement cleaning up if required
     std::cout << "XO Game cleanup" << std::endl;
 }
-
